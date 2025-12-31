@@ -181,6 +181,8 @@ export function checkLeviathanStabs(game: GameState): void {
       levi.isGolden = true;
       levi.isStunned = false;
       levi.stunTimer = 0;
+      levi.goldenDashCount = 0;
+      levi.goldenDashDelay = 0;
 
       player.invincible = true;
       player.invincibilityTimer = GAME_CONSTANTS.INVINCIBILITY_DURATION;

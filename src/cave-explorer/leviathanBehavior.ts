@@ -92,10 +92,48 @@ export function updateLeviathans(
         levi.vx = levi.chargeDirection.x * GAME_CONSTANTS.LEVIATHAN_CHARGE_SPEED;
         levi.vy = levi.chargeDirection.y * GAME_CONSTANTS.LEVIATHAN_CHARGE_SPEED;
       } else {
+        // Dash completed
         levi.isCharging = false;
-        levi.chargeCooldown = GAME_CONSTANTS.LEVIATHAN_CHARGE_COOLDOWN;
-        levi.vx = levi.chargeDirection.x * 2;
-        levi.vy = levi.chargeDirection.y * 2;
+
+        if (levi.isGolden) {
+          levi.goldenDashCount++;
+
+          if (levi.goldenDashCount < levi.goldenDashTotal) {
+            // Queue next dash with short delay
+            levi.goldenDashDelay = 20; // ~0.33 seconds at 60fps
+            levi.vx = levi.chargeDirection.x * 2;
+            levi.vy = levi.chargeDirection.y * 2;
+          } else {
+            // All 3 dashes complete - stun the fish
+            levi.isStunned = true;
+            levi.stunTimer = GAME_CONSTANTS.LEVIATHAN_STUN_DURATION;
+            levi.goldenDashCount = 0;
+            levi.vx = 0;
+            levi.vy = 0;
+          }
+        } else {
+          // Normal (non-golden) charge
+          levi.chargeCooldown = GAME_CONSTANTS.LEVIATHAN_CHARGE_COOLDOWN;
+          levi.vx = levi.chargeDirection.x * 2;
+          levi.vy = levi.chargeDirection.y * 2;
+        }
+      }
+    } else if (levi.goldenDashDelay > 0) {
+      // Golden fish waiting between dashes
+      levi.goldenDashDelay--;
+      levi.vx *= 0.9;
+      levi.vy *= 0.9;
+
+      if (levi.goldenDashDelay === 0) {
+        // Start next dash
+        levi.isCharging = true;
+        levi.chargeTimer = GAME_CONSTANTS.LEVIATHAN_CHARGE_WINDUP / 2; // Shorter windup
+
+        const dx = playerPos.x - levi.x;
+        const dy = playerPos.y - levi.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        levi.chargeDirection = { x: dx / dist, y: dy / dist };
+        levi.rotation = Math.atan2(levi.chargeDirection.y, levi.chargeDirection.x);
       }
     } else if (targetX !== null && targetY !== null) {
       // Pursue target
@@ -185,6 +223,8 @@ export function updateLeviathans(
         levi.isStunned = true;
         levi.stunTimer = GAME_CONSTANTS.LEVIATHAN_STUN_DURATION;
         levi.chargeCooldown = GAME_CONSTANTS.LEVIATHAN_CHARGE_COOLDOWN;
+        levi.goldenDashCount = 0; // Reset golden dash count
+        levi.goldenDashDelay = 0;
         levi.vx = 0;
         levi.vy = 0;
       } else {

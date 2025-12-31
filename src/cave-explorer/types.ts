@@ -50,6 +50,9 @@ export interface Leviathan {
   isStunned: boolean;
   stunTimer: number;
   isGolden: boolean;
+  goldenDashCount: number;
+  goldenDashTotal: number;
+  goldenDashDelay: number;
 }
 
 export interface World {
