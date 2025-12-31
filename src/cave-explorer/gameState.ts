@@ -92,6 +92,11 @@ export function updatePlayer(game: GameState): void {
   // Check collision with leviathans
   if (!player.isDead && !player.invincible) {
     for (const levi of game.leviathans) {
+      // Skip collision if leviathan is stunned
+      if (levi.isStunned) {
+        continue;
+      }
+
       const dx = levi.x - player.x;
       const dy = levi.y - player.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
@@ -209,6 +214,10 @@ export function checkLeviathanStabs(game: GameState): void {
       } else if (levi.isGolden && levi.isStunned) {
         // Damage golden leviathan only when stunned
         levi.health -= GAME_CONSTANTS.LEVIATHAN_DAMAGE_PER_HIT;
+
+        // Grant invincibility when stabbing stunned golden leviathan
+        player.invincible = true;
+        player.invincibilityTimer = GAME_CONSTANTS.INVINCIBILITY_DURATION;
 
         if (levi.health <= 0) {
           // Spawn food orbs at leviathan position
