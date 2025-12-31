@@ -42,8 +42,7 @@ export function spawnLeviathan(
           chargeDirection: { x: 0, y: 0 },
           chargeCooldown: 0,
           isStunned: false,
-          stunTimer: 0,
-          isGolden: false
+          stunTimer: 0
         };
       }
     }
