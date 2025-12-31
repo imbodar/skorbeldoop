@@ -14,13 +14,17 @@ export default function App() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      minHeight: '100vh',
+      width: '100vw',
+      height: '100vh',
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       fontFamily: 'system-ui, -apple-system, sans-serif',
-      padding: '20px'
+      padding: '20px',
+      boxSizing: 'border-box',
+      overflow: 'auto'
     }}>
       <div style={{
-        maxWidth: '800px',
+        maxWidth: '90%',
+        width: '800px',
         background: 'rgba(255, 255, 255, 0.95)',
         borderRadius: '16px',
         padding: '40px',
