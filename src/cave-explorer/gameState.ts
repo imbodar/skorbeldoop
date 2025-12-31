@@ -369,7 +369,7 @@ export function trySpawnBoid(game: GameState): void {
 
 export function updateGame(game: GameState): void {
   updatePlayer(game);
-  updateBoids(game.boids, { x: game.player.x, y: game.player.y }, game.world.rocks);
+  updateBoids(game.boids, { x: game.player.x, y: game.player.y }, game.world.rocks, game.swarmers);
   updateLeviathans(
     game.leviathans,
     { x: game.player.x, y: game.player.y },
