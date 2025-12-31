@@ -1,0 +1,13 @@
+name = "skorbeldoop-multiplayer"
+main = "worker/index.ts"
+compatibility_date = "2024-01-01"
+
+# Durable Object binding
+[[durable_objects.bindings]]
+name = "CURSOR_ROOMS"
+class_name = "CursorRoom"
+
+# Migration to enable the Durable Object
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["CursorRoom"]

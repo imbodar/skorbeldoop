@@ -52,6 +52,58 @@ p {
   font-size: 0.9em;
 }
 
+.demos {
+  margin-top: 3rem;
+}
+
+.demos h2 {
+  font-size: 1.8em;
+  margin-bottom: 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.demo-link {
+  text-decoration: none;
+  display: block;
+  margin: 1rem 0;
+  transition: transform 0.2s;
+}
+
+.demo-link:hover {
+  transform: translateY(-4px);
+}
+
+.demo-card {
+  background: linear-gradient(135deg, rgba(240, 148, 51, 0.1), rgba(188, 24, 136, 0.1));
+  border: 2px solid rgba(240, 148, 51, 0.3);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: left;
+  transition: all 0.3s;
+}
+
+.demo-card:hover {
+  border-color: rgba(240, 148, 51, 0.6);
+  background: linear-gradient(135deg, rgba(240, 148, 51, 0.15), rgba(188, 24, 136, 0.15));
+  box-shadow: 0 8px 32px rgba(240, 148, 51, 0.2);
+}
+
+.demo-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5em;
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.demo-card p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -60,5 +112,23 @@ p {
 
   .info {
     color: #666;
+  }
+
+  .demos h2 {
+    color: #213547;
+  }
+
+  .demo-card {
+    background: linear-gradient(135deg, rgba(240, 148, 51, 0.05), rgba(188, 24, 136, 0.05));
+    border-color: rgba(240, 148, 51, 0.4);
+  }
+
+  .demo-card:hover {
+    background: linear-gradient(135deg, rgba(240, 148, 51, 0.1), rgba(188, 24, 136, 0.1));
+    border-color: rgba(240, 148, 51, 0.7);
+  }
+
+  .demo-card p {
+    color: #444;
   }
 }

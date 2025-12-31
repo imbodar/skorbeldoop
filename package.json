@@ -4,9 +4,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:worker": "wrangler dev --config wrangler-worker.toml",
     "build": "vite build",
+    "build:worker": "wrangler deploy --config wrangler-worker.toml",
     "preview": "vite preview",
-    "deploy": "npm run build && wrangler pages deploy dist"
+    "deploy": "npm run build && wrangler pages deploy dist",
+    "deploy:all": "npm run build && npm run build:worker && wrangler pages deploy dist"
   },
   "devDependencies": {
     "typescript": "^5.3.3",

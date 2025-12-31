@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multiplayer Cursor Demo - Skorbeldoop</title>
+  </head>
+  <body>
+    <div id="cursor-app">
+      <div class="header">
+        <h1>Multiplayer Cursor Demo</h1>
+        <div class="status">
+          <span id="status">Connecting...</span>
+          <span id="player-count">Players: 0</span>
+        </div>
+        <a href="/" class="back-link">← Back to Home</a>
+      </div>
+      <div class="info-box">
+        <p>Move your cursor around! You'll see other players' cursors in real-time.</p>
+        <p class="room-info">Room: <strong id="room-name">default</strong></p>
+      </div>
+      <div id="cursor-area">
+        <!-- Cursors will be rendered here -->
+      </div>
+    </div>
+    <script type="module" src="/src/cursor.ts"></script>
+  </body>
+</html>
