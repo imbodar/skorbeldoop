@@ -608,6 +608,31 @@ function drawPlayer(ctx: CanvasRenderingContext2D, game: GameState): void {
   ctx.closePath();
   ctx.fill();
 
+  // Draw armor if player has 3 shell fragments
+  if (player.shellFragments >= 3) {
+    ctx.fillStyle = '#0066ff';
+    ctx.strokeStyle = '#0044aa';
+    ctx.lineWidth = 2;
+
+    // Left armor plate (scalene triangle)
+    ctx.beginPath();
+    ctx.moveTo(x, y + h * 0.2);  // Top point (closer to front)
+    ctx.lineTo(x - 15, y + h * 0.4);  // Outer middle point
+    ctx.lineTo(x, y + h * 0.7);  // Bottom point (closer to back)
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Right armor plate (scalene triangle)
+    ctx.beginPath();
+    ctx.moveTo(x + w, y + h * 0.2);  // Top point (closer to front)
+    ctx.lineTo(x + w + 15, y + h * 0.4);  // Outer middle point
+    ctx.lineTo(x + w, y + h * 0.7);  // Bottom point (closer to back)
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+
   // Draw spike
   const spikeLength = GAME_CONSTANTS.PLAYER_SPIKE_LENGTH;
   const spikeWidth = GAME_CONSTANTS.PLAYER_SPIKE_WIDTH;
