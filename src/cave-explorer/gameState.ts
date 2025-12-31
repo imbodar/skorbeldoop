@@ -1,4 +1,4 @@
-import { GameState, Player, Boid, Leviathan, Point } from './types';
+import { GameState, Player, Boid, Leviathan, Point, FoodOrb } from './types';
 import { GAME_CONSTANTS } from './constants';
 import { checkRockCollision } from './physics';
 import { spawnBoid } from './boidGenerator';
@@ -157,12 +157,30 @@ export function checkBoidCollisions(game: GameState): void {
   }
 }
 
+function spawnFoodOrbs(x: number, y: number, count: number): FoodOrb[] {
+  const orbs: FoodOrb[] = [];
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 * i) / count + Math.random() * 0.3;
+    const speed = GAME_CONSTANTS.FOOD_ORB_SPREAD_SPEED;
+    orbs.push({
+      x,
+      y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      size: GAME_CONSTANTS.FOOD_ORB_SIZE,
+      lifetime: GAME_CONSTANTS.FOOD_ORB_LIFETIME
+    });
+  }
+  return orbs;
+}
+
 export function checkLeviathanStabs(game: GameState): void {
   const player = game.player;
 
-  for (const levi of game.leviathans) {
-    if (!levi.isStunned) continue;
+  for (let i = game.leviathans.length - 1; i >= 0; i--) {
+    const levi = game.leviathans[i];
 
+    // Check if player spike hits the leviathan
     const dx = levi.x - player.x;
     const dy = levi.y - player.y;
 
@@ -175,17 +193,74 @@ export function checkLeviathanStabs(game: GameState): void {
     const spikeEndY = frontY - GAME_CONSTANTS.PLAYER_SPIKE_LENGTH;
 
     const leviRadius = Math.max(levi.width, levi.height) / 2;
-    if (localY < frontY &&
+    const spikeHit = localY < frontY &&
         localY > spikeEndY - leviRadius &&
-        Math.abs(localX) < GAME_CONSTANTS.PLAYER_SPIKE_WIDTH + leviRadius) {
-      levi.isGolden = true;
-      levi.isStunned = false;
-      levi.stunTimer = 0;
+        Math.abs(localX) < GAME_CONSTANTS.PLAYER_SPIKE_WIDTH + leviRadius;
 
-      player.invincible = true;
-      player.invincibilityTimer = GAME_CONSTANTS.INVINCIBILITY_DURATION;
+    if (spikeHit) {
+      if (!levi.isGolden && levi.isStunned) {
+        // Turn stunned non-golden leviathan into golden
+        levi.isGolden = true;
+        levi.isStunned = false;
+        levi.stunTimer = 0;
 
-      break;
+        player.invincible = true;
+        player.invincibilityTimer = GAME_CONSTANTS.INVINCIBILITY_DURATION;
+      } else if (levi.isGolden) {
+        // Damage golden leviathan
+        levi.health -= GAME_CONSTANTS.LEVIATHAN_DAMAGE_PER_HIT;
+
+        if (levi.health <= 0) {
+          // Spawn food orbs at leviathan position
+          const newOrbs = spawnFoodOrbs(levi.x, levi.y, GAME_CONSTANTS.FOOD_ORB_COUNT);
+          game.foodOrbs.push(...newOrbs);
+
+          // Remove the leviathan
+          game.leviathans.splice(i, 1);
+        }
+      }
+    }
+  }
+}
+
+export function updateFoodOrbs(game: GameState): void {
+  for (let i = game.foodOrbs.length - 1; i >= 0; i--) {
+    const orb = game.foodOrbs[i];
+
+    // Update position
+    orb.x += orb.vx;
+    orb.y += orb.vy;
+
+    // Apply friction
+    orb.vx *= 0.98;
+    orb.vy *= 0.98;
+
+    // Decrease lifetime
+    orb.lifetime--;
+
+    // Remove if expired
+    if (orb.lifetime <= 0) {
+      game.foodOrbs.splice(i, 1);
+    }
+  }
+}
+
+export function checkFoodOrbCollisions(game: GameState): void {
+  const player = game.player;
+  const playerCollisionRadius = Math.max(player.width, player.height) / 2;
+
+  for (let i = game.foodOrbs.length - 1; i >= 0; i--) {
+    const orb = game.foodOrbs[i];
+    const dx = orb.x - player.x;
+    const dy = orb.y - player.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < playerCollisionRadius + orb.size) {
+      // Restore hunger
+      player.hunger = Math.min(player.maxHunger, player.hunger + GAME_CONSTANTS.FOOD_ORB_HUNGER_VALUE);
+
+      // Remove the orb
+      game.foodOrbs.splice(i, 1);
     }
   }
 }
@@ -211,7 +286,9 @@ export function updateGame(game: GameState): void {
     game.boids,
     game.world.rocks
   );
+  updateFoodOrbs(game);
   checkBoidCollisions(game);
+  checkFoodOrbCollisions(game);
   checkLeviathanStabs(game);
   trySpawnBoid(game);
 }

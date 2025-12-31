@@ -40,6 +40,7 @@ export function renderGame(
 
   // Draw entities
   drawBoids(ctx, game, rayEndpoints);
+  drawFoodOrbs(ctx, game, rayEndpoints);
   drawLeviathans(ctx, game, rayEndpoints);
   drawPlayer(ctx, game);
 
@@ -241,6 +242,77 @@ function drawBoids(
     ctx.lineTo(0, boid.size);
     ctx.lineTo(0, -boid.size);
     ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+  });
+}
+
+function drawFoodOrbs(
+  ctx: CanvasRenderingContext2D,
+  game: GameState,
+  rayEndpoints: Point[]
+): void {
+  const maxDistance = GAME_CONSTANTS.LINE_OF_SIGHT_DISTANCE;
+
+  game.foodOrbs.forEach(orb => {
+    const dx = orb.x - game.player.x;
+    const dy = orb.y - game.player.y;
+    const distToOrb = Math.sqrt(dx * dx + dy * dy);
+
+    if (distToOrb > maxDistance) return;
+
+    // Check line of sight
+    let blocked = false;
+    if (distToOrb > 100) {
+      const rayDir = { x: dx / distToOrb, y: dy / distToOrb };
+
+      for (const rock of game.world.rocks) {
+        const rockDx = rock.x - game.player.x;
+        const rockDy = rock.y - game.player.y;
+        const rockDist = Math.sqrt(rockDx * rockDx + rockDy * rockDy);
+
+        if (rockDist > distToOrb + 100) continue;
+
+        const t = rayRectIntersection(game.player, rayDir, rock);
+        if (t !== null && t < distToOrb - 10) {
+          blocked = true;
+          break;
+        }
+      }
+    }
+
+    if (blocked) return;
+
+    // Draw glow effect
+    ctx.save();
+    ctx.translate(orb.x, orb.y);
+
+    // Outer glow
+    const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, orb.size * 3);
+    glowGradient.addColorStop(0, 'rgba(255, 215, 0, 0.6)');
+    glowGradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.3)');
+    glowGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+    ctx.fillStyle = glowGradient;
+    ctx.beginPath();
+    ctx.arc(0, 0, orb.size * 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Inner orb
+    const orbGradient = ctx.createRadialGradient(-orb.size / 3, -orb.size / 3, 0, 0, 0, orb.size);
+    orbGradient.addColorStop(0, '#fffacd');
+    orbGradient.addColorStop(0.5, '#ffd700');
+    orbGradient.addColorStop(1, '#daa520');
+    ctx.fillStyle = orbGradient;
+    ctx.beginPath();
+    ctx.arc(0, 0, orb.size, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Shimmer effect
+    const shimmerAlpha = (Math.sin(Date.now() / 200) + 1) / 2 * 0.3;
+    ctx.fillStyle = `rgba(255, 255, 255, ${shimmerAlpha})`;
+    ctx.beginPath();
+    ctx.arc(-orb.size / 3, -orb.size / 3, orb.size / 2, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();

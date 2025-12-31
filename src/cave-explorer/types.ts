@@ -34,6 +34,15 @@ export interface Boid {
   trail: Array<{ x: number; y: number }>;
 }
 
+export interface FoodOrb {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  lifetime: number;
+}
+
 export interface Leviathan {
   x: number;
   y: number;
@@ -50,6 +59,8 @@ export interface Leviathan {
   isStunned: boolean;
   stunTimer: number;
   isGolden: boolean;
+  health: number;
+  maxHealth: number;
 }
 
 export interface World {
@@ -72,6 +83,7 @@ export interface GameState {
   previousRayEndpoints: Array<{ x: number; y: number }>;
   boids: Boid[];
   leviathans: Leviathan[];
+  foodOrbs: FoodOrb[];
 }
 
 export interface Point {
