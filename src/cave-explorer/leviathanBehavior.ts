@@ -101,6 +101,10 @@ export function updateLeviathans(
         levi.vy = levi.chargeDirection.y * chargeSpeed;
       } else {
         levi.isCharging = false;
+        // Increment dash count for golden leviathans
+        if (levi.isGolden) {
+          levi.goldenDashCount++;
+        }
         levi.chargeCooldown = GAME_CONSTANTS.LEVIATHAN_CHARGE_COOLDOWN;
         levi.vx = levi.chargeDirection.x * 2;
         levi.vy = levi.chargeDirection.y * 2;
@@ -199,12 +203,23 @@ export function updateLeviathans(
       if (levi.isCharging &&
           levi.chargeTimer <= 0 &&
           levi.chargeTimer > -chargeDuration) {
-        // Hit wall while dashing - become stunned (unless golden)
+        // Hit wall while dashing
         levi.isCharging = false;
-        if (!levi.isGolden) {
+
+        if (levi.isGolden) {
+          // Golden fish: increment dash count and stun after 3 dashes
+          levi.goldenDashCount++;
+          if (levi.goldenDashCount >= 3) {
+            levi.isStunned = true;
+            levi.stunTimer = GAME_CONSTANTS.LEVIATHAN_STUN_DURATION;
+            levi.goldenDashCount = 0; // Reset counter
+          }
+        } else {
+          // Normal leviathan: stun immediately
           levi.isStunned = true;
           levi.stunTimer = GAME_CONSTANTS.LEVIATHAN_STUN_DURATION;
         }
+
         levi.chargeCooldown = GAME_CONSTANTS.LEVIATHAN_CHARGE_COOLDOWN;
         levi.vx = 0;
         levi.vy = 0;

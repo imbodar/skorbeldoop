@@ -187,6 +187,7 @@ export function checkLeviathanStabs(game: GameState): void {
         levi.isGolden = true;
         levi.isStunned = false;
         levi.stunTimer = 0;
+        levi.goldenDashCount = 0;
       }
 
       player.invincible = true;
