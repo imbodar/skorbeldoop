@@ -61,6 +61,7 @@ export interface Leviathan {
   isGolden: boolean;
   health: number;
   maxHealth: number;
+  dashCount: number;
 }
 
 export interface World {
