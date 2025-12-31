@@ -43,7 +43,10 @@ export function spawnLeviathan(
           chargeCooldown: 0,
           isStunned: false,
           stunTimer: 0,
-          isGolden: false
+          isGolden: false,
+          goldenDashCount: 0,
+          goldenDashTotal: 3,
+          goldenDashDelay: 0
         };
       }
     }
