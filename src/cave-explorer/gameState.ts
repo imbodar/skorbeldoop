@@ -160,7 +160,8 @@ export function checkBoidCollisions(game: GameState): void {
 export function checkLeviathanStabs(game: GameState): void {
   const player = game.player;
 
-  for (const levi of game.leviathans) {
+  for (let i = game.leviathans.length - 1; i >= 0; i--) {
+    const levi = game.leviathans[i];
     if (!levi.isStunned) continue;
 
     const dx = levi.x - player.x;
@@ -178,9 +179,16 @@ export function checkLeviathanStabs(game: GameState): void {
     if (localY < frontY &&
         localY > spikeEndY - leviRadius &&
         Math.abs(localX) < GAME_CONSTANTS.PLAYER_SPIKE_WIDTH + leviRadius) {
-      levi.isGolden = true;
-      levi.isStunned = false;
-      levi.stunTimer = 0;
+      if (levi.isGolden) {
+        // Golden fish dies and disappears
+        game.leviathans.splice(i, 1);
+      } else {
+        // Normal leviathan becomes golden
+        levi.isGolden = true;
+        levi.isStunned = false;
+        levi.stunTimer = 0;
+        levi.goldenDashCount = 0;
+      }
 
       player.invincible = true;
       player.invincibilityTimer = GAME_CONSTANTS.INVINCIBILITY_DURATION;
