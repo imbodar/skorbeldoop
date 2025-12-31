@@ -581,6 +581,25 @@ function drawHUD(
   ctx.fillText(`Speed: ${Math.abs(game.player.speed).toFixed(2)}`, 10, 50);
   ctx.fillText(`Rotation: ${(game.player.rotation * 180 / Math.PI).toFixed(1)}°`, 10, 75);
 
+  // Shell fragments counter
+  ctx.save();
+  const fragmentY = 100;
+
+  // Draw red triangle symbol
+  ctx.fillStyle = '#ff0000';
+  ctx.beginPath();
+  ctx.moveTo(10, fragmentY - 5);
+  ctx.lineTo(20, fragmentY - 5);
+  ctx.lineTo(15, fragmentY - 15);
+  ctx.closePath();
+  ctx.fill();
+
+  // Draw fragment count
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '16px monospace';
+  ctx.fillText('0/3', 25, fragmentY);
+  ctx.restore();
+
   // Hunger bar
   const hungerBarX = canvas.width - 210;
   const hungerBarY = 10;
