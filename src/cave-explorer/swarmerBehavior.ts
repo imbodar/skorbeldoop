@@ -59,16 +59,27 @@ export function updateSwarmers(
     swarmer.vx += (Math.random() - 0.5) * 0.1;
     swarmer.vy += (Math.random() - 0.5) * 0.1;
 
-    // Wall avoidance
+    // Optimized wall avoidance - only check nearby rocks
     let wallAvoidX = 0;
     let wallAvoidY = 0;
     const wallAvoidanceRadius = 100;
+    const maxCheckRadius = 200; // Pre-filter rocks by distance
+    let rocksChecked = 0;
+    const maxRocksToCheck = 10; // Limit number of rocks to check
 
     for (const rock of rocks) {
+      // Quick distance check without sqrt
       const rockDx = swarmer.x - rock.x;
       const rockDy = swarmer.y - rock.y;
-      const rockDist = Math.sqrt(rockDx * rockDx + rockDy * rockDy);
+      const distSq = rockDx * rockDx + rockDy * rockDy;
 
+      // Skip if too far
+      if (distSq > maxCheckRadius * maxCheckRadius) continue;
+
+      // Limit number of rocks checked for performance
+      if (++rocksChecked > maxRocksToCheck) break;
+
+      const rockDist = Math.sqrt(distSq);
       if (rockDist < wallAvoidanceRadius + rock.width / 2) {
         const effectiveDist = rockDist - rock.width / 2;
         if (effectiveDist < wallAvoidanceRadius && effectiveDist > 0) {

@@ -548,73 +548,46 @@ function drawSwarmers(
   game: GameState,
   rayEndpoints: Point[]
 ): void {
-  const maxDistance = GAME_CONSTANTS.LINE_OF_SIGHT_DISTANCE;
-
+  // Simplified rendering for performance
   game.swarmers.forEach(swarmer => {
     const dx = swarmer.x - game.player.x;
     const dy = swarmer.y - game.player.y;
     const distToSwarmer = Math.sqrt(dx * dx + dy * dy);
 
-    if (distToSwarmer > maxDistance) return;
+    // Skip if too far from player
+    if (distToSwarmer > 1200) return;
 
-    // Check line of sight
-    let blocked = false;
-    if (distToSwarmer > 150) {
-      const rayDir = { x: dx / distToSwarmer, y: dy / distToSwarmer };
-
-      for (const rock of game.world.rocks) {
-        const rockDx = rock.x - game.player.x;
-        const rockDy = rock.y - game.player.y;
-        const rockDist = Math.sqrt(rockDx * rockDx + rockDy * rockDy);
-
-        if (rockDist > distToSwarmer + 100) continue;
-
-        const t = rayRectIntersection(game.player, rayDir, rock);
-        if (t !== null && t < distToSwarmer - 20) {
-          blocked = true;
-          break;
-        }
-      }
-    }
-
-    if (blocked) return;
-
-    // Draw trail
+    // Draw simple trail (reduced complexity)
     if (swarmer.trail && swarmer.trail.length > 0) {
-      for (let i = 0; i < swarmer.trail.length; i++) {
+      // Only draw every other trail point
+      for (let i = 0; i < swarmer.trail.length; i += 2) {
         const trailPos = swarmer.trail[i];
         const age = i / swarmer.trail.length;
-        const alpha = age * age * 0.6;
-        const size = 6 + age * 18;
+        const alpha = age * age * 0.4;
+        const size = 8 + age * 12;
 
-        ctx.fillStyle = `rgba(0, 100, 150, ${alpha})`;
+        ctx.fillStyle = `rgba(0, 150, 200, ${alpha})`;
         ctx.beginPath();
         ctx.arc(trailPos.x, trailPos.y, size, 0, Math.PI * 2);
         ctx.fill();
       }
     }
 
-    ctx.save();
-    ctx.translate(swarmer.x, swarmer.y);
-
-    // Very bright blue glow effect
-    const swarmerGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 100);
-    swarmerGradient.addColorStop(0, 'rgba(0, 217, 255, 0.9)');
-    swarmerGradient.addColorStop(0.3, 'rgba(0, 217, 255, 0.7)');
-    swarmerGradient.addColorStop(0.6, 'rgba(0, 217, 255, 0.4)');
-    swarmerGradient.addColorStop(1, 'rgba(0, 217, 255, 0)');
-    ctx.fillStyle = swarmerGradient;
+    // Draw simple glow (no gradient)
+    ctx.fillStyle = 'rgba(0, 217, 255, 0.2)';
     ctx.beginPath();
-    ctx.arc(0, 0, 100, 0, Math.PI * 2);
+    ctx.arc(swarmer.x, swarmer.y, 50, 0, Math.PI * 2);
     ctx.fill();
 
+    // Draw body as blue triangle
+    ctx.save();
+    ctx.translate(swarmer.x, swarmer.y);
     ctx.rotate(swarmer.rotation);
 
-    // Draw body as blue triangle (same color as player)
     const swarmerSize = swarmer.height / 2;
     const swarmerHeight = swarmerSize * Math.sqrt(3);
 
-    ctx.fillStyle = '#00d9ff'; // Same blue as player
+    ctx.fillStyle = '#00d9ff';
     ctx.beginPath();
     ctx.moveTo(swarmerHeight, 0);
     ctx.lineTo(0, swarmerSize);
