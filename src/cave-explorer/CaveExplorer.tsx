@@ -110,57 +110,76 @@ export default function CaveExplorer() {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
+      justifyContent: 'flex-start',
+      width: '100vw',
+      height: '100vh',
       background: '#0f0f1e',
-      fontFamily: 'monospace'
+      fontFamily: 'monospace',
+      boxSizing: 'border-box',
+      overflow: 'hidden',
+      padding: '20px',
+      gap: '15px'
     }}>
-      <h1 style={{ color: '#00d9ff', marginBottom: '20px' }}>Cave Explorer</h1>
+      <h1 style={{ color: '#00d9ff', margin: '0', fontSize: '32px' }}>Cave Explorer</h1>
       <canvas
         ref={canvasRef}
-        width={800}
-        height={600}
+        width={Math.min(window.innerWidth - 40, 1600)}
+        height={Math.min(window.innerHeight - 180, 900)}
         style={{
           border: '2px solid #00d9ff',
           borderRadius: '4px',
-          boxShadow: '0 0 20px rgba(0, 217, 255, 0.3)'
+          boxShadow: '0 0 20px rgba(0, 217, 255, 0.3)',
+          flexGrow: 1,
+          maxWidth: '100%',
+          maxHeight: 'calc(100vh - 180px)'
         }}
       />
-      <button
-        onClick={handleSpawnLeviathan}
-        style={{
-          marginTop: '15px',
-          padding: '12px 24px',
-          fontSize: '16px',
-          fontFamily: 'monospace',
-          background: '#ff69b4',
-          color: '#0f0f1e',
-          border: '2px solid #ff1493',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontWeight: 'bold',
-          boxShadow: '0 0 15px rgba(255, 105, 180, 0.3)',
-          transition: 'all 0.2s'
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.background = '#ff8dc7';
-          e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 105, 180, 0.5)';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.background = '#ff69b4';
-          e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 105, 180, 0.3)';
-        }}
-      >
-        Spawn Giant Fish
-      </button>
       <div style={{
-        marginTop: '20px',
-        color: '#aaaaaa',
-        textAlign: 'center'
+        display: 'flex',
+        gap: '15px',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        justifyContent: 'center'
       }}>
-        <p>Navigate through massive cave systems!</p>
-        <p>Hunt glowing fish to survive - watch your hunger!</p>
-        <p>Watch out for massive pink fish!</p>
+        <button
+          onClick={handleSpawnLeviathan}
+          style={{
+            padding: '10px 20px',
+            fontSize: '14px',
+            fontFamily: 'monospace',
+            background: '#ff69b4',
+            color: '#0f0f1e',
+            border: '2px solid #ff1493',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            boxShadow: '0 0 15px rgba(255, 105, 180, 0.3)',
+            transition: 'all 0.2s'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = '#ff8dc7';
+            e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 105, 180, 0.5)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = '#ff69b4';
+            e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 105, 180, 0.3)';
+          }}
+        >
+          Spawn Giant Fish
+        </button>
+        <div style={{
+          color: '#aaaaaa',
+          textAlign: 'center',
+          fontSize: '14px',
+          display: 'flex',
+          gap: '15px'
+        }}>
+          <span>Navigate cave systems</span>
+          <span>•</span>
+          <span>Hunt glowing fish</span>
+          <span>•</span>
+          <span>Avoid pink leviathans!</span>
+        </div>
       </div>
     </div>
   );
