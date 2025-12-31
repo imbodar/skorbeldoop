@@ -618,6 +618,31 @@ function drawPlayer(ctx: CanvasRenderingContext2D, game: GameState): void {
       opacity = 0.2 + (rechargeProgress * 0.8);
     }
 
+    // Draw golden glow when shield is ready
+    if (player.hasShield) {
+      const pulse = Math.sin(Date.now() / 300) * 0.2 + 0.8;
+
+      // Left armor glow
+      const leftGlow = ctx.createRadialGradient(x - 7.5, y + h * 0.45, 0, x - 7.5, y + h * 0.45, 25);
+      leftGlow.addColorStop(0, `rgba(255, 215, 0, ${pulse * 0.6})`);
+      leftGlow.addColorStop(0.5, `rgba(255, 215, 0, ${pulse * 0.3})`);
+      leftGlow.addColorStop(1, 'rgba(255, 215, 0, 0)');
+      ctx.fillStyle = leftGlow;
+      ctx.beginPath();
+      ctx.arc(x - 7.5, y + h * 0.45, 25, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Right armor glow
+      const rightGlow = ctx.createRadialGradient(x + w + 7.5, y + h * 0.45, 0, x + w + 7.5, y + h * 0.45, 25);
+      rightGlow.addColorStop(0, `rgba(255, 215, 0, ${pulse * 0.6})`);
+      rightGlow.addColorStop(0.5, `rgba(255, 215, 0, ${pulse * 0.3})`);
+      rightGlow.addColorStop(1, 'rgba(255, 215, 0, 0)');
+      ctx.fillStyle = rightGlow;
+      ctx.beginPath();
+      ctx.arc(x + w + 7.5, y + h * 0.45, 25, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
     ctx.fillStyle = `rgba(0, 102, 255, ${opacity})`;
     ctx.strokeStyle = `rgba(0, 68, 170, ${opacity})`;
     ctx.lineWidth = 2;
