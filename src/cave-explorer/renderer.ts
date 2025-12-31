@@ -610,8 +610,16 @@ function drawPlayer(ctx: CanvasRenderingContext2D, game: GameState): void {
 
   // Draw armor if player has 3 shell fragments
   if (player.shellFragments >= 3) {
-    ctx.fillStyle = '#0066ff';
-    ctx.strokeStyle = '#0044aa';
+    // Calculate opacity based on shield status
+    let opacity = 1.0;
+    if (!player.hasShield && player.shieldRechargeTimer > 0) {
+      // Recharging: opacity increases from 0.2 to 1.0 over 30 seconds
+      const rechargeProgress = 1 - (player.shieldRechargeTimer / 1800);
+      opacity = 0.2 + (rechargeProgress * 0.8);
+    }
+
+    ctx.fillStyle = `rgba(0, 102, 255, ${opacity})`;
+    ctx.strokeStyle = `rgba(0, 68, 170, ${opacity})`;
     ctx.lineWidth = 2;
 
     // Left armor plate (scalene triangle)

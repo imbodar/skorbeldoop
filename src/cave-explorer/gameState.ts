@@ -23,7 +23,9 @@ export function initializePlayer(): Player {
     isDead: false,
     invincible: false,
     invincibilityTimer: 0,
-    shellFragments: 0
+    shellFragments: 0,
+    hasShield: false,
+    shieldRechargeTimer: 0
   };
 }
 
@@ -90,6 +92,20 @@ export function updatePlayer(game: GameState): void {
     }
   }
 
+  // Update shield status
+  if (player.shellFragments >= 3) {
+    if (!player.hasShield && player.shieldRechargeTimer === 0) {
+      // Activate shield if player has 3 fragments and no active shield
+      player.hasShield = true;
+    } else if (!player.hasShield && player.shieldRechargeTimer > 0) {
+      // Recharge shield (30 seconds = 1800 frames at 60fps)
+      player.shieldRechargeTimer--;
+      if (player.shieldRechargeTimer === 0) {
+        player.hasShield = true;
+      }
+    }
+  }
+
   // Check collision with leviathans
   if (!player.isDead && !player.invincible) {
     for (const levi of game.leviathans) {
@@ -104,7 +120,17 @@ export function updatePlayer(game: GameState): void {
       const collisionDist = Math.max(levi.width, levi.height) / 2 + Math.max(player.width, player.height) / 2;
 
       if (dist < collisionDist) {
-        player.isDead = true;
+        // Check if player has shield
+        if (player.hasShield && player.shellFragments >= 3) {
+          // Consume shield and start recharge
+          player.hasShield = false;
+          player.shieldRechargeTimer = 1800; // 30 seconds at 60fps
+          // Grant brief invincibility to avoid instant re-hit
+          player.invincible = true;
+          player.invincibilityTimer = 120; // 2 seconds
+        } else {
+          player.isDead = true;
+        }
         break;
       }
     }

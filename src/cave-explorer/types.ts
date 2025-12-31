@@ -16,6 +16,8 @@ export interface Player {
   invincible: boolean;
   invincibilityTimer: number;
   shellFragments: number;
+  hasShield: boolean;
+  shieldRechargeTimer: number;
 }
 
 export interface Rock {
