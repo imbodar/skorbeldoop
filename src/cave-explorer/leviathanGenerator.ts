@@ -45,7 +45,8 @@ export function spawnLeviathan(
           stunTimer: 0,
           isGolden: false,
           health: GAME_CONSTANTS.LEVIATHAN_MAX_HEALTH,
-          maxHealth: GAME_CONSTANTS.LEVIATHAN_MAX_HEALTH
+          maxHealth: GAME_CONSTANTS.LEVIATHAN_MAX_HEALTH,
+          dashCount: 0
         };
       }
     }

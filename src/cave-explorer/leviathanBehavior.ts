@@ -83,27 +83,31 @@ export function updateLeviathans(
 
     // Handle charging state
     if (levi.isCharging) {
-      // Golden leviathans have reduced dash distance
-      const chargeSpeed = levi.isGolden
-        ? GAME_CONSTANTS.LEVIATHAN_CHARGE_SPEED * 0.5
-        : GAME_CONSTANTS.LEVIATHAN_CHARGE_SPEED;
-      const chargeDuration = levi.isGolden
-        ? GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION * 0.5
-        : GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION;
-
       if (levi.chargeTimer > 0) {
         levi.chargeTimer--;
         levi.vx = 0;
         levi.vy = 0;
-      } else if (levi.chargeTimer > -chargeDuration) {
+      } else if (levi.chargeTimer > -GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION) {
         levi.chargeTimer--;
-        levi.vx = levi.chargeDirection.x * chargeSpeed;
-        levi.vy = levi.chargeDirection.y * chargeSpeed;
+        levi.vx = levi.chargeDirection.x * GAME_CONSTANTS.LEVIATHAN_CHARGE_SPEED;
+        levi.vy = levi.chargeDirection.y * GAME_CONSTANTS.LEVIATHAN_CHARGE_SPEED;
       } else {
         levi.isCharging = false;
         levi.chargeCooldown = GAME_CONSTANTS.LEVIATHAN_CHARGE_COOLDOWN;
         levi.vx = levi.chargeDirection.x * 2;
         levi.vy = levi.chargeDirection.y * 2;
+
+        // Increment dash count for golden leviathans
+        if (levi.isGolden) {
+          levi.dashCount++;
+
+          // Stun after 4 dashes
+          if (levi.dashCount >= 4) {
+            levi.isStunned = true;
+            levi.stunTimer = GAME_CONSTANTS.LEVIATHAN_STUN_DURATION;
+            levi.dashCount = 0;
+          }
+        }
       }
     } else if (targetX !== null && targetY !== null) {
       // Pursue target
@@ -155,17 +159,10 @@ export function updateLeviathans(
     }
 
     // Limit speed
-    const chargeDuration = levi.isGolden
-      ? GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION * 0.5
-      : GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION;
-    const chargeSpeed = levi.isGolden
-      ? GAME_CONSTANTS.LEVIATHAN_CHARGE_SPEED * 0.5
-      : GAME_CONSTANTS.LEVIATHAN_CHARGE_SPEED;
-
     const currentMaxSpeed = (levi.isCharging &&
                              levi.chargeTimer <= 0 &&
-                             levi.chargeTimer > -chargeDuration)
-      ? chargeSpeed
+                             levi.chargeTimer > -GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION)
+      ? GAME_CONSTANTS.LEVIATHAN_CHARGE_SPEED
       : GAME_CONSTANTS.LEVIATHAN_MAX_SPEED;
 
     const speed = Math.sqrt(levi.vx * levi.vx + levi.vy * levi.vy);
@@ -192,18 +189,15 @@ export function updateLeviathans(
       levi.y = newY;
     } else {
       // Hit wall
-      const chargeDuration = levi.isGolden
-        ? GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION * 0.5
-        : GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION;
-
       if (levi.isCharging &&
           levi.chargeTimer <= 0 &&
-          levi.chargeTimer > -chargeDuration) {
+          levi.chargeTimer > -GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION) {
         // Hit wall while dashing - become stunned
         levi.isCharging = false;
         levi.isStunned = true;
         levi.stunTimer = GAME_CONSTANTS.LEVIATHAN_STUN_DURATION;
         levi.chargeCooldown = GAME_CONSTANTS.LEVIATHAN_CHARGE_COOLDOWN;
+        levi.dashCount = 0; // Reset dash count when stunned by wall
         levi.vx = 0;
         levi.vy = 0;
       } else {

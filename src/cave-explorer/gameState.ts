@@ -206,8 +206,8 @@ export function checkLeviathanStabs(game: GameState): void {
 
         player.invincible = true;
         player.invincibilityTimer = GAME_CONSTANTS.INVINCIBILITY_DURATION;
-      } else if (levi.isGolden) {
-        // Damage golden leviathan
+      } else if (levi.isGolden && levi.isStunned) {
+        // Damage golden leviathan only when stunned
         levi.health -= GAME_CONSTANTS.LEVIATHAN_DAMAGE_PER_HIT;
 
         if (levi.health <= 0) {
