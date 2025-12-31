@@ -1,11 +1,12 @@
-import { Boid, Rock, Point } from './types';
+import { Boid, Rock, Point, Swarmer } from './types';
 import { GAME_CONSTANTS } from './constants';
 import { checkRockCollision } from './physics';
 
 export function updateBoids(
   boids: Boid[],
   playerPos: Point,
-  rocks: Rock[]
+  rocks: Rock[],
+  swarmers: Swarmer[]
 ): void {
   const updateRadius = 1200;
 
@@ -99,6 +100,34 @@ export function updateBoids(
       }
     }
 
+    // Swarmer trail attraction and avoidance
+    let swarmerTrailForceX = 0;
+    let swarmerTrailForceY = 0;
+
+    for (const swarmer of swarmers) {
+      // Check all trail points
+      for (const trailPoint of swarmer.trail) {
+        const dx = trailPoint.x - boid.x;
+        const dy = trailPoint.y - boid.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Avoid trail at close distances
+        if (dist < GAME_CONSTANTS.SWARMER_TRAIL_AVOIDANCE_RADIUS && dist > 0) {
+          const strength = (GAME_CONSTANTS.SWARMER_TRAIL_AVOIDANCE_RADIUS - dist) /
+                          GAME_CONSTANTS.SWARMER_TRAIL_AVOIDANCE_RADIUS;
+          swarmerTrailForceX -= (dx / dist) * strength * GAME_CONSTANTS.SWARMER_TRAIL_AVOIDANCE_STRENGTH;
+          swarmerTrailForceY -= (dy / dist) * strength * GAME_CONSTANTS.SWARMER_TRAIL_AVOIDANCE_STRENGTH;
+        }
+        // Attract to trail at medium distances
+        else if (dist < GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_RADIUS && dist > 0) {
+          const strength = (GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_RADIUS - dist) /
+                          GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_RADIUS;
+          swarmerTrailForceX += (dx / dist) * strength * GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_STRENGTH;
+          swarmerTrailForceY += (dy / dist) * strength * GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_STRENGTH;
+        }
+      }
+    }
+
     // Apply forces
     boid.vx += separationForceX * 0.35;
     boid.vy += separationForceY * 0.35;
@@ -110,6 +139,8 @@ export function updateBoids(
     boid.vy += playerAvoidY;
     boid.vx += wallAvoidX;
     boid.vy += wallAvoidY;
+    boid.vx += swarmerTrailForceX;
+    boid.vy += swarmerTrailForceY;
 
     // Limit speed
     const speed = Math.sqrt(boid.vx * boid.vx + boid.vy * boid.vy);
