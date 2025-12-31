@@ -15,6 +15,7 @@ export interface Player {
   isDead: boolean;
   invincible: boolean;
   invincibilityTimer: number;
+  shellFragments: number;
 }
 
 export interface Rock {
@@ -41,6 +42,16 @@ export interface FoodOrb {
   vy: number;
   size: number;
   lifetime: number;
+}
+
+export interface ShellFragment {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  rotation: number;
+  rotationSpeed: number;
 }
 
 export interface Leviathan {
@@ -85,6 +96,7 @@ export interface GameState {
   boids: Boid[];
   leviathans: Leviathan[];
   foodOrbs: FoodOrb[];
+  shellFragments: ShellFragment[];
 }
 
 export interface Point {

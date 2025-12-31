@@ -35,7 +35,8 @@ export default function CaveExplorer() {
       previousRayEndpoints: [],
       boids: [],
       leviathans: [],
-      foodOrbs: []
+      foodOrbs: [],
+      shellFragments: []
     };
 
     // Store game reference

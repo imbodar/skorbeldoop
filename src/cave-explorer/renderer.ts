@@ -41,6 +41,7 @@ export function renderGame(
   // Draw entities
   drawBoids(ctx, game, rayEndpoints);
   drawFoodOrbs(ctx, game, rayEndpoints);
+  drawShellFragments(ctx, game, rayEndpoints);
   drawLeviathans(ctx, game, rayEndpoints);
   drawPlayer(ctx, game);
 
@@ -314,6 +315,65 @@ function drawFoodOrbs(
     ctx.beginPath();
     ctx.arc(-orb.size / 3, -orb.size / 3, orb.size / 2, 0, Math.PI * 2);
     ctx.fill();
+
+    ctx.restore();
+  });
+}
+
+function drawShellFragments(
+  ctx: CanvasRenderingContext2D,
+  game: GameState,
+  rayEndpoints: Point[]
+): void {
+  const maxDistance = GAME_CONSTANTS.LINE_OF_SIGHT_DISTANCE;
+
+  game.shellFragments.forEach(fragment => {
+    const dx = fragment.x - game.player.x;
+    const dy = fragment.y - game.player.y;
+    const distToFragment = Math.sqrt(dx * dx + dy * dy);
+
+    if (distToFragment > maxDistance) return;
+
+    // Check line of sight
+    let blocked = false;
+    if (distToFragment > 100) {
+      const rayDir = { x: dx / distToFragment, y: dy / distToFragment };
+
+      for (const rock of game.world.rocks) {
+        const rockDx = rock.x - game.player.x;
+        const rockDy = rock.y - game.player.y;
+        const rockDist = Math.sqrt(rockDx * rockDx + rockDy * rockDy);
+
+        if (rockDist > distToFragment + 100) continue;
+
+        const t = rayRectIntersection(game.player, rayDir, rock);
+        if (t !== null && t < distToFragment - 10) {
+          blocked = true;
+          break;
+        }
+      }
+    }
+
+    if (blocked) return;
+
+    // Draw shell fragment
+    ctx.save();
+    ctx.translate(fragment.x, fragment.y);
+    ctx.rotate(fragment.rotation);
+
+    // Draw red triangle
+    ctx.fillStyle = '#ff0000';
+    ctx.beginPath();
+    ctx.moveTo(0, -fragment.size);
+    ctx.lineTo(fragment.size * 0.866, fragment.size / 2);
+    ctx.lineTo(-fragment.size * 0.866, fragment.size / 2);
+    ctx.closePath();
+    ctx.fill();
+
+    // Add outline
+    ctx.strokeStyle = '#aa0000';
+    ctx.lineWidth = 2;
+    ctx.stroke();
 
     ctx.restore();
   });
@@ -597,7 +657,7 @@ function drawHUD(
   // Draw fragment count
   ctx.fillStyle = '#ffffff';
   ctx.font = '16px monospace';
-  ctx.fillText('0/3', 25, fragmentY);
+  ctx.fillText(`${game.player.shellFragments}/3`, 25, fragmentY);
   ctx.restore();
 
   // Hunger bar
