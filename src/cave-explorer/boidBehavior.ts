@@ -31,6 +31,18 @@ export function updateBoids(
       maxSpeed = GAME_CONSTANTS.BOID_BASE_MAX_SPEED * fleeSpeedMultiplier;
     }
 
+    // Check if boid is near any swarmer
+    let nearSwarmer = false;
+    for (const swarmer of swarmers) {
+      const dx = swarmer.x - boid.x;
+      const dy = swarmer.y - boid.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < GAME_CONSTANTS.SWARMER_PROXIMITY_RADIUS) {
+        nearSwarmer = true;
+        break;
+      }
+    }
+
     // Flocking forces
     let separationForceX = 0;
     let separationForceY = 0;
@@ -129,8 +141,9 @@ export function updateBoids(
     }
 
     // Apply forces
-    boid.vx += separationForceX * 0.35;
-    boid.vy += separationForceY * 0.35;
+    const separationStrength = nearSwarmer ? 0.35 * GAME_CONSTANTS.SWARMER_SEPARATION_MULTIPLIER : 0.35;
+    boid.vx += separationForceX * separationStrength;
+    boid.vy += separationForceY * separationStrength;
     boid.vx += alignmentForceX * 0.05;
     boid.vy += alignmentForceY * 0.05;
     boid.vx += cohesionForceX * 0.02;
