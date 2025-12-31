@@ -43,6 +43,7 @@ export function renderGame(
   drawFoodOrbs(ctx, game, rayEndpoints);
   drawShellFragments(ctx, game, rayEndpoints);
   drawLeviathans(ctx, game, rayEndpoints);
+  drawSwarmers(ctx, game, rayEndpoints);
   drawPlayer(ctx, game);
 
   ctx.restore();
@@ -538,6 +539,88 @@ function drawLeviathans(
 
       ctx.restore();
     }
+  });
+}
+
+function drawSwarmers(
+  ctx: CanvasRenderingContext2D,
+  game: GameState,
+  rayEndpoints: Point[]
+): void {
+  const maxDistance = GAME_CONSTANTS.LINE_OF_SIGHT_DISTANCE;
+
+  game.swarmers.forEach(swarmer => {
+    const dx = swarmer.x - game.player.x;
+    const dy = swarmer.y - game.player.y;
+    const distToSwarmer = Math.sqrt(dx * dx + dy * dy);
+
+    if (distToSwarmer > maxDistance) return;
+
+    // Check line of sight
+    let blocked = false;
+    if (distToSwarmer > 150) {
+      const rayDir = { x: dx / distToSwarmer, y: dy / distToSwarmer };
+
+      for (const rock of game.world.rocks) {
+        const rockDx = rock.x - game.player.x;
+        const rockDy = rock.y - game.player.y;
+        const rockDist = Math.sqrt(rockDx * rockDx + rockDy * rockDy);
+
+        if (rockDist > distToSwarmer + 100) continue;
+
+        const t = rayRectIntersection(game.player, rayDir, rock);
+        if (t !== null && t < distToSwarmer - 20) {
+          blocked = true;
+          break;
+        }
+      }
+    }
+
+    if (blocked) return;
+
+    // Draw trail
+    if (swarmer.trail && swarmer.trail.length > 0) {
+      for (let i = 0; i < swarmer.trail.length; i++) {
+        const trailPos = swarmer.trail[i];
+        const age = i / swarmer.trail.length;
+        const alpha = age * age * 0.4;
+        const size = 6 + age * 18;
+
+        ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(trailPos.x, trailPos.y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    ctx.save();
+    ctx.translate(swarmer.x, swarmer.y);
+
+    // Golden glow effect
+    const swarmerGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 60);
+    swarmerGradient.addColorStop(0, 'rgba(255, 215, 0, 0.6)');
+    swarmerGradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.3)');
+    swarmerGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+    ctx.fillStyle = swarmerGradient;
+    ctx.beginPath();
+    ctx.arc(0, 0, 60, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.rotate(swarmer.rotation);
+
+    // Draw body as golden triangle
+    const swarmerSize = swarmer.height / 2;
+    const swarmerHeight = swarmerSize * Math.sqrt(3);
+
+    ctx.fillStyle = '#FFD700'; // Golden color
+    ctx.beginPath();
+    ctx.moveTo(swarmerHeight, 0);
+    ctx.lineTo(0, swarmerSize);
+    ctx.lineTo(0, -swarmerSize);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
   });
 }
 
