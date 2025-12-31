@@ -583,10 +583,10 @@ function drawSwarmers(
       for (let i = 0; i < swarmer.trail.length; i++) {
         const trailPos = swarmer.trail[i];
         const age = i / swarmer.trail.length;
-        const alpha = age * age * 0.4;
+        const alpha = age * age * 0.6;
         const size = 6 + age * 18;
 
-        ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
+        ctx.fillStyle = `rgba(0, 100, 150, ${alpha})`;
         ctx.beginPath();
         ctx.arc(trailPos.x, trailPos.y, size, 0, Math.PI * 2);
         ctx.fill();
@@ -596,23 +596,24 @@ function drawSwarmers(
     ctx.save();
     ctx.translate(swarmer.x, swarmer.y);
 
-    // Golden glow effect
-    const swarmerGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 60);
-    swarmerGradient.addColorStop(0, 'rgba(255, 215, 0, 0.6)');
-    swarmerGradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.3)');
-    swarmerGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+    // Very bright blue glow effect
+    const swarmerGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 100);
+    swarmerGradient.addColorStop(0, 'rgba(0, 217, 255, 0.9)');
+    swarmerGradient.addColorStop(0.3, 'rgba(0, 217, 255, 0.7)');
+    swarmerGradient.addColorStop(0.6, 'rgba(0, 217, 255, 0.4)');
+    swarmerGradient.addColorStop(1, 'rgba(0, 217, 255, 0)');
     ctx.fillStyle = swarmerGradient;
     ctx.beginPath();
-    ctx.arc(0, 0, 60, 0, Math.PI * 2);
+    ctx.arc(0, 0, 100, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.rotate(swarmer.rotation);
 
-    // Draw body as golden triangle
+    // Draw body as blue triangle (same color as player)
     const swarmerSize = swarmer.height / 2;
     const swarmerHeight = swarmerSize * Math.sqrt(3);
 
-    ctx.fillStyle = '#FFD700'; // Golden color
+    ctx.fillStyle = '#00d9ff'; // Same blue as player
     ctx.beginPath();
     ctx.moveTo(swarmerHeight, 0);
     ctx.lineTo(0, swarmerSize);
