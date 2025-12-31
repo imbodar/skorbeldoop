@@ -35,7 +35,8 @@ export default function CaveExplorer() {
       previousRayEndpoints: [],
       boids: [],
       leviathans: [],
-      foodOrbs: []
+      foodOrbs: [],
+      shellFragments: []
     };
 
     // Store game reference
@@ -106,6 +107,13 @@ export default function CaveExplorer() {
     }
   };
 
+  const handleAddFragment = () => {
+    if (gameRef.current) {
+      gameRef.current.player.shellFragments++;
+      console.log(`Shell fragments: ${gameRef.current.player.shellFragments}/3`);
+    }
+  };
+
   return (
     <div style={{
       display: 'flex',
@@ -167,6 +175,32 @@ export default function CaveExplorer() {
           }}
         >
           Spawn Giant Fish
+        </button>
+        <button
+          onClick={handleAddFragment}
+          style={{
+            padding: '10px 20px',
+            fontSize: '14px',
+            fontFamily: 'monospace',
+            background: '#ff0000',
+            color: '#ffffff',
+            border: '2px solid #aa0000',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            boxShadow: '0 0 15px rgba(255, 0, 0, 0.3)',
+            transition: 'all 0.2s'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = '#ff3333';
+            e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 0, 0, 0.5)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = '#ff0000';
+            e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 0, 0, 0.3)';
+          }}
+        >
+          Add Shell Fragment
         </button>
         <div style={{
           color: '#aaaaaa',

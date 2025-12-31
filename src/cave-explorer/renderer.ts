@@ -41,6 +41,7 @@ export function renderGame(
   // Draw entities
   drawBoids(ctx, game, rayEndpoints);
   drawFoodOrbs(ctx, game, rayEndpoints);
+  drawShellFragments(ctx, game, rayEndpoints);
   drawLeviathans(ctx, game, rayEndpoints);
   drawPlayer(ctx, game);
 
@@ -319,6 +320,65 @@ function drawFoodOrbs(
   });
 }
 
+function drawShellFragments(
+  ctx: CanvasRenderingContext2D,
+  game: GameState,
+  rayEndpoints: Point[]
+): void {
+  const maxDistance = GAME_CONSTANTS.LINE_OF_SIGHT_DISTANCE;
+
+  game.shellFragments.forEach(fragment => {
+    const dx = fragment.x - game.player.x;
+    const dy = fragment.y - game.player.y;
+    const distToFragment = Math.sqrt(dx * dx + dy * dy);
+
+    if (distToFragment > maxDistance) return;
+
+    // Check line of sight
+    let blocked = false;
+    if (distToFragment > 100) {
+      const rayDir = { x: dx / distToFragment, y: dy / distToFragment };
+
+      for (const rock of game.world.rocks) {
+        const rockDx = rock.x - game.player.x;
+        const rockDy = rock.y - game.player.y;
+        const rockDist = Math.sqrt(rockDx * rockDx + rockDy * rockDy);
+
+        if (rockDist > distToFragment + 100) continue;
+
+        const t = rayRectIntersection(game.player, rayDir, rock);
+        if (t !== null && t < distToFragment - 10) {
+          blocked = true;
+          break;
+        }
+      }
+    }
+
+    if (blocked) return;
+
+    // Draw shell fragment
+    ctx.save();
+    ctx.translate(fragment.x, fragment.y);
+    ctx.rotate(fragment.rotation);
+
+    // Draw red triangle
+    ctx.fillStyle = '#ff0000';
+    ctx.beginPath();
+    ctx.moveTo(0, -fragment.size);
+    ctx.lineTo(fragment.size * 0.866, fragment.size / 2);
+    ctx.lineTo(-fragment.size * 0.866, fragment.size / 2);
+    ctx.closePath();
+    ctx.fill();
+
+    // Add outline
+    ctx.strokeStyle = '#aa0000';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.restore();
+  });
+}
+
 function drawLeviathans(
   ctx: CanvasRenderingContext2D,
   game: GameState,
@@ -548,6 +608,64 @@ function drawPlayer(ctx: CanvasRenderingContext2D, game: GameState): void {
   ctx.closePath();
   ctx.fill();
 
+  // Draw armor if player has 3 shell fragments
+  if (player.shellFragments >= 3) {
+    // Calculate opacity based on shield status
+    let opacity = 1.0;
+    if (!player.hasShield && player.shieldRechargeTimer > 0) {
+      // Recharging: opacity increases from 0.2 to 1.0 over 30 seconds
+      const rechargeProgress = 1 - (player.shieldRechargeTimer / 1800);
+      opacity = 0.2 + (rechargeProgress * 0.8);
+    }
+
+    // Draw golden glow when shield is ready
+    if (player.hasShield) {
+      const pulse = Math.sin(Date.now() / 300) * 0.2 + 0.8;
+
+      // Left armor glow
+      const leftGlow = ctx.createRadialGradient(x - 7.5, y + h * 0.45, 0, x - 7.5, y + h * 0.45, 25);
+      leftGlow.addColorStop(0, `rgba(255, 215, 0, ${pulse * 0.6})`);
+      leftGlow.addColorStop(0.5, `rgba(255, 215, 0, ${pulse * 0.3})`);
+      leftGlow.addColorStop(1, 'rgba(255, 215, 0, 0)');
+      ctx.fillStyle = leftGlow;
+      ctx.beginPath();
+      ctx.arc(x - 7.5, y + h * 0.45, 25, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Right armor glow
+      const rightGlow = ctx.createRadialGradient(x + w + 7.5, y + h * 0.45, 0, x + w + 7.5, y + h * 0.45, 25);
+      rightGlow.addColorStop(0, `rgba(255, 215, 0, ${pulse * 0.6})`);
+      rightGlow.addColorStop(0.5, `rgba(255, 215, 0, ${pulse * 0.3})`);
+      rightGlow.addColorStop(1, 'rgba(255, 215, 0, 0)');
+      ctx.fillStyle = rightGlow;
+      ctx.beginPath();
+      ctx.arc(x + w + 7.5, y + h * 0.45, 25, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.fillStyle = `rgba(0, 102, 255, ${opacity})`;
+    ctx.strokeStyle = `rgba(0, 68, 170, ${opacity})`;
+    ctx.lineWidth = 2;
+
+    // Left armor plate (scalene triangle)
+    ctx.beginPath();
+    ctx.moveTo(x, y + h * 0.2);  // Top point (closer to front)
+    ctx.lineTo(x - 15, y + h * 0.4);  // Outer middle point
+    ctx.lineTo(x, y + h * 0.7);  // Bottom point (closer to back)
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Right armor plate (scalene triangle)
+    ctx.beginPath();
+    ctx.moveTo(x + w, y + h * 0.2);  // Top point (closer to front)
+    ctx.lineTo(x + w + 15, y + h * 0.4);  // Outer middle point
+    ctx.lineTo(x + w, y + h * 0.7);  // Bottom point (closer to back)
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+
   // Draw spike
   const spikeLength = GAME_CONSTANTS.PLAYER_SPIKE_LENGTH;
   const spikeWidth = GAME_CONSTANTS.PLAYER_SPIKE_WIDTH;
@@ -580,6 +698,25 @@ function drawHUD(
   ctx.fillText(`Position: (${Math.round(game.player.x)}, ${Math.round(game.player.y)})`, 10, 25);
   ctx.fillText(`Speed: ${Math.abs(game.player.speed).toFixed(2)}`, 10, 50);
   ctx.fillText(`Rotation: ${(game.player.rotation * 180 / Math.PI).toFixed(1)}°`, 10, 75);
+
+  // Shell fragments counter
+  ctx.save();
+  const fragmentY = 100;
+
+  // Draw red triangle symbol
+  ctx.fillStyle = '#ff0000';
+  ctx.beginPath();
+  ctx.moveTo(10, fragmentY - 5);
+  ctx.lineTo(20, fragmentY - 5);
+  ctx.lineTo(15, fragmentY - 15);
+  ctx.closePath();
+  ctx.fill();
+
+  // Draw fragment count
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '16px monospace';
+  ctx.fillText(`${game.player.shellFragments}/3`, 25, fragmentY);
+  ctx.restore();
 
   // Hunger bar
   const hungerBarX = canvas.width - 210;

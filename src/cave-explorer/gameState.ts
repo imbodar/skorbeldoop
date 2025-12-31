@@ -1,4 +1,4 @@
-import { GameState, Player, Boid, Leviathan, Point, FoodOrb } from './types';
+import { GameState, Player, Boid, Leviathan, Point, FoodOrb, ShellFragment } from './types';
 import { GAME_CONSTANTS } from './constants';
 import { checkRockCollision } from './physics';
 import { spawnBoid } from './boidGenerator';
@@ -22,7 +22,10 @@ export function initializePlayer(): Player {
     trail: [],
     isDead: false,
     invincible: false,
-    invincibilityTimer: 0
+    invincibilityTimer: 0,
+    shellFragments: 0,
+    hasShield: false,
+    shieldRechargeTimer: 0
   };
 }
 
@@ -89,6 +92,20 @@ export function updatePlayer(game: GameState): void {
     }
   }
 
+  // Update shield status
+  if (player.shellFragments >= 3) {
+    if (!player.hasShield && player.shieldRechargeTimer === 0) {
+      // Activate shield if player has 3 fragments and no active shield
+      player.hasShield = true;
+    } else if (!player.hasShield && player.shieldRechargeTimer > 0) {
+      // Recharge shield (30 seconds = 1800 frames at 60fps)
+      player.shieldRechargeTimer--;
+      if (player.shieldRechargeTimer === 0) {
+        player.hasShield = true;
+      }
+    }
+  }
+
   // Check collision with leviathans
   if (!player.isDead && !player.invincible) {
     for (const levi of game.leviathans) {
@@ -103,7 +120,17 @@ export function updatePlayer(game: GameState): void {
       const collisionDist = Math.max(levi.width, levi.height) / 2 + Math.max(player.width, player.height) / 2;
 
       if (dist < collisionDist) {
-        player.isDead = true;
+        // Check if player has shield
+        if (player.hasShield && player.shellFragments >= 3) {
+          // Consume shield and start recharge
+          player.hasShield = false;
+          player.shieldRechargeTimer = 1800; // 30 seconds at 60fps
+          // Grant brief invincibility to avoid instant re-hit
+          player.invincible = true;
+          player.invincibilityTimer = 120; // 2 seconds
+        } else {
+          player.isDead = true;
+        }
         break;
       }
     }
@@ -179,6 +206,20 @@ function spawnFoodOrbs(x: number, y: number, count: number): FoodOrb[] {
   return orbs;
 }
 
+function spawnShellFragment(x: number, y: number): ShellFragment {
+  const angle = Math.random() * Math.PI * 2;
+  const speed = 3;
+  return {
+    x,
+    y,
+    vx: Math.cos(angle) * speed,
+    vy: Math.sin(angle) * speed,
+    size: 15,
+    rotation: Math.random() * Math.PI * 2,
+    rotationSpeed: (Math.random() - 0.5) * 0.1
+  };
+}
+
 export function checkLeviathanStabs(game: GameState): void {
   const player = game.player;
 
@@ -223,6 +264,10 @@ export function checkLeviathanStabs(game: GameState): void {
           // Spawn food orbs at leviathan position
           const newOrbs = spawnFoodOrbs(levi.x, levi.y, GAME_CONSTANTS.FOOD_ORB_COUNT);
           game.foodOrbs.push(...newOrbs);
+
+          // Spawn shell fragment
+          const shellFragment = spawnShellFragment(levi.x, levi.y);
+          game.shellFragments.push(shellFragment);
 
           // Remove the leviathan
           game.leviathans.splice(i, 1);
@@ -274,6 +319,41 @@ export function checkFoodOrbCollisions(game: GameState): void {
   }
 }
 
+export function updateShellFragments(game: GameState): void {
+  for (const fragment of game.shellFragments) {
+    // Update position
+    fragment.x += fragment.vx;
+    fragment.y += fragment.vy;
+
+    // Apply friction
+    fragment.vx *= 0.98;
+    fragment.vy *= 0.98;
+
+    // Update rotation
+    fragment.rotation += fragment.rotationSpeed;
+  }
+}
+
+export function checkShellFragmentCollisions(game: GameState): void {
+  const player = game.player;
+  const playerCollisionRadius = Math.max(player.width, player.height) / 2;
+
+  for (let i = game.shellFragments.length - 1; i >= 0; i--) {
+    const fragment = game.shellFragments[i];
+    const dx = fragment.x - player.x;
+    const dy = fragment.y - player.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < playerCollisionRadius + fragment.size) {
+      // Increment shell fragment count
+      player.shellFragments++;
+
+      // Remove the fragment
+      game.shellFragments.splice(i, 1);
+    }
+  }
+}
+
 export function trySpawnBoid(game: GameState): void {
   if (Math.random() < 0.02) {
     const maxBoids = GAME_CONSTANTS.BOID_COUNT;
@@ -296,8 +376,10 @@ export function updateGame(game: GameState): void {
     game.world.rocks
   );
   updateFoodOrbs(game);
+  updateShellFragments(game);
   checkBoidCollisions(game);
   checkFoodOrbCollisions(game);
+  checkShellFragmentCollisions(game);
   checkLeviathanStabs(game);
   trySpawnBoid(game);
 }
