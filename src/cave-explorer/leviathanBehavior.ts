@@ -199,10 +199,12 @@ export function updateLeviathans(
       if (levi.isCharging &&
           levi.chargeTimer <= 0 &&
           levi.chargeTimer > -chargeDuration) {
-        // Hit wall while dashing - become stunned
+        // Hit wall while dashing - become stunned (unless golden)
         levi.isCharging = false;
-        levi.isStunned = true;
-        levi.stunTimer = GAME_CONSTANTS.LEVIATHAN_STUN_DURATION;
+        if (!levi.isGolden) {
+          levi.isStunned = true;
+          levi.stunTimer = GAME_CONSTANTS.LEVIATHAN_STUN_DURATION;
+        }
         levi.chargeCooldown = GAME_CONSTANTS.LEVIATHAN_CHARGE_COOLDOWN;
         levi.vx = 0;
         levi.vy = 0;
