@@ -82,17 +82,23 @@ In your Cloudflare Pages project settings, configure:
 
 **Do not** set a custom deploy command - Cloudflare Pages will automatically deploy the contents of the `dist` directory after building.
 
-## Worker Configuration
+## Deployment URLs
 
-After deploying your worker with `npm run build:worker`, note the worker URL (e.g., `https://skorbeldoop-multiplayer.your-subdomain.workers.dev`).
+This project has **two separate deployments**:
 
-You'll need to update the WebSocket URL in `src/cursor.ts` for production:
+### 1. Pages Site (Frontend)
+- **Main site**: `https://skorbeldoop.pages.dev` (or your custom domain)
+- **Branch previews**: `https://claude-{branch}.skorbeldoop.pages.dev`
+- Access your HTML pages here: `/index.html`, `/cursor.html`
 
-```typescript
-const workerUrl = isDev
-  ? 'ws://localhost:8787'
-  : 'wss://skorbeldoop-multiplayer.your-subdomain.workers.dev'; // Update this!
-```
+### 2. Worker (WebSocket Server)
+- **Main worker**: `https://skorbeldoop-multiplayer.thedarwinias.workers.dev`
+- **Branch workers**: `https://claude-{branch}-skorbeldoop.thedarwinias.workers.dev`
+- WebSocket endpoints: `/cursor/{roomId}`
+
+**Important**: Always access HTML pages from the **Pages URL**, not the Worker URL!
+
+The cursor demo automatically detects the correct Worker URL based on your Pages deployment.
 
 ## How It Works
 

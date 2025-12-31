@@ -34,14 +34,29 @@ class MultiplayerCursor {
   private connect() {
     // Determine WebSocket URL based on environment
     // For local dev: ws://localhost:8787
-    // For production: wss://skorbeldoop-multiplayer.your-subdomain.workers.dev
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-
-    // Check if we're in local development
+    // For production: Automatically construct from branch name or use configured URL
     const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const workerUrl = isDev
-      ? 'ws://localhost:8787'
-      : 'wss://skorbeldoop-multiplayer.your-subdomain.workers.dev'; // TODO: Update with actual worker URL
+
+    let workerUrl: string;
+
+    if (isDev) {
+      workerUrl = 'ws://localhost:8787';
+    } else {
+      // Try to auto-detect Worker URL from Pages environment
+      // Format: claude-{branch}-skorbeldoop.thedarwinias.workers.dev
+      const hostname = window.location.hostname;
+
+      // Extract branch name if on Pages preview (e.g., claude-add-cloudflare-workers-multiplayer-c7eqz.skorbeldoop.pages.dev)
+      const branchMatch = hostname.match(/^(claude-[^.]+)\./);
+
+      if (branchMatch) {
+        // Construct Worker URL based on branch
+        workerUrl = `wss://${branchMatch[1]}-skorbeldoop.thedarwinias.workers.dev`;
+      } else {
+        // Fallback to main Worker URL
+        workerUrl = 'wss://skorbeldoop-multiplayer.thedarwinias.workers.dev';
+      }
+    }
 
     const wsUrl = `${workerUrl}/cursor/${this.roomId}`;
 
