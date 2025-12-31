@@ -49,7 +49,6 @@ export interface Leviathan {
   chargeCooldown: number;
   isStunned: boolean;
   stunTimer: number;
-  isGolden: boolean;
 }
 
 export interface World {

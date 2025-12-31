@@ -83,13 +83,8 @@ export function updateLeviathans(
 
     // Handle charging state
     if (levi.isCharging) {
-      // Golden leviathans have reduced dash distance
-      const chargeSpeed = levi.isGolden
-        ? GAME_CONSTANTS.LEVIATHAN_CHARGE_SPEED * 0.5
-        : GAME_CONSTANTS.LEVIATHAN_CHARGE_SPEED;
-      const chargeDuration = levi.isGolden
-        ? GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION * 0.5
-        : GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION;
+      const chargeSpeed = GAME_CONSTANTS.LEVIATHAN_CHARGE_SPEED;
+      const chargeDuration = GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION;
 
       if (levi.chargeTimer > 0) {
         levi.chargeTimer--;
@@ -155,12 +150,8 @@ export function updateLeviathans(
     }
 
     // Limit speed
-    const chargeDuration = levi.isGolden
-      ? GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION * 0.5
-      : GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION;
-    const chargeSpeed = levi.isGolden
-      ? GAME_CONSTANTS.LEVIATHAN_CHARGE_SPEED * 0.5
-      : GAME_CONSTANTS.LEVIATHAN_CHARGE_SPEED;
+    const chargeDuration = GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION;
+    const chargeSpeed = GAME_CONSTANTS.LEVIATHAN_CHARGE_SPEED;
 
     const currentMaxSpeed = (levi.isCharging &&
                              levi.chargeTimer <= 0 &&
@@ -192,9 +183,7 @@ export function updateLeviathans(
       levi.y = newY;
     } else {
       // Hit wall
-      const chargeDuration = levi.isGolden
-        ? GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION * 0.5
-        : GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION;
+      const chargeDuration = GAME_CONSTANTS.LEVIATHAN_CHARGE_DURATION;
 
       if (levi.isCharging &&
           levi.chargeTimer <= 0 &&

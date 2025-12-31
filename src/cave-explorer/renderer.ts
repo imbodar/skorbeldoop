@@ -291,10 +291,7 @@ function drawLeviathans(
         const alpha = age * age * 0.4;
         const size = 6 + age * 18;
 
-        const color = levi.isGolden
-          ? `rgba(255, 215, 0, ${alpha})`
-          : `rgba(255, 105, 180, ${alpha})`;
-        ctx.fillStyle = color;
+        ctx.fillStyle = `rgba(255, 105, 180, ${alpha})`;
         ctx.beginPath();
         ctx.arc(trailPos.x, trailPos.y, size, 0, Math.PI * 2);
         ctx.fill();
@@ -306,15 +303,9 @@ function drawLeviathans(
 
     // Glow effect
     const leviGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 60);
-    if (levi.isGolden) {
-      leviGradient.addColorStop(0, 'rgba(255, 215, 0, 0.4)');
-      leviGradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.2)');
-      leviGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
-    } else {
-      leviGradient.addColorStop(0, 'rgba(255, 105, 180, 0.4)');
-      leviGradient.addColorStop(0.5, 'rgba(255, 105, 180, 0.2)');
-      leviGradient.addColorStop(1, 'rgba(255, 105, 180, 0)');
-    }
+    leviGradient.addColorStop(0, 'rgba(255, 105, 180, 0.4)');
+    leviGradient.addColorStop(0.5, 'rgba(255, 105, 180, 0.2)');
+    leviGradient.addColorStop(1, 'rgba(255, 105, 180, 0)');
     ctx.fillStyle = leviGradient;
     ctx.beginPath();
     ctx.arc(0, 0, 60, 0, Math.PI * 2);
@@ -359,7 +350,7 @@ function drawLeviathans(
     const leviSize = levi.height / 2;
     const leviHeight = leviSize * Math.sqrt(3);
 
-    ctx.fillStyle = levi.isGolden ? '#ffd700' : '#ff69b4';
+    ctx.fillStyle = '#ff69b4';
     ctx.beginPath();
     ctx.moveTo(leviHeight, 0);
     ctx.lineTo(0, leviSize);
