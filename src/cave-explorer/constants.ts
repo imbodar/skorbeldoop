@@ -67,6 +67,7 @@ export const GAME_CONSTANTS = {
   PROJECTILE_SPEED: 8,
   PROJECTILE_RADIUS: 8,
   PROJECTILE_SHOOT_INTERVAL: 120, // 2 seconds at 60fps
+  PROJECTILE_MAX_COUNT: 30, // Limit total projectiles for performance
 
   // Food Orbs
   FOOD_ORB_COUNT: 8,

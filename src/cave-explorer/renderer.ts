@@ -630,34 +630,25 @@ function drawProjectiles(
   ctx: CanvasRenderingContext2D,
   game: GameState
 ): void {
+  // Draw simple circles without expensive gradients
   game.projectiles.forEach(projectile => {
-    // Draw glowing circular projectile
-    ctx.save();
-    ctx.translate(projectile.x, projectile.y);
-
-    // Outer glow
-    const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, projectile.radius * 3);
-    glowGradient.addColorStop(0, 'rgba(0, 217, 255, 0.8)');
-    glowGradient.addColorStop(0.5, 'rgba(0, 217, 255, 0.4)');
-    glowGradient.addColorStop(1, 'rgba(0, 217, 255, 0)');
-    ctx.fillStyle = glowGradient;
+    // Outer glow (simple semi-transparent circle)
+    ctx.fillStyle = 'rgba(0, 217, 255, 0.3)';
     ctx.beginPath();
-    ctx.arc(0, 0, projectile.radius * 3, 0, Math.PI * 2);
+    ctx.arc(projectile.x, projectile.y, projectile.radius * 2, 0, Math.PI * 2);
     ctx.fill();
 
     // Core projectile
     ctx.fillStyle = '#00d9ff';
     ctx.beginPath();
-    ctx.arc(0, 0, projectile.radius, 0, Math.PI * 2);
+    ctx.arc(projectile.x, projectile.y, projectile.radius, 0, Math.PI * 2);
     ctx.fill();
 
     // Inner bright core
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.arc(0, 0, projectile.radius * 0.5, 0, Math.PI * 2);
+    ctx.arc(projectile.x, projectile.y, projectile.radius * 0.5, 0, Math.PI * 2);
     ctx.fill();
-
-    ctx.restore();
   });
 }
 

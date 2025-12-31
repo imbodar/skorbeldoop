@@ -21,9 +21,10 @@ export function updateSwarmers(
       return;
     }
 
-    // Shoot projectiles at player
+    // Shoot projectiles at player (with max count check for performance)
     const timeSinceLastShot = frameCount - swarmer.lastShootTime;
-    if (timeSinceLastShot >= GAME_CONSTANTS.PROJECTILE_SHOOT_INTERVAL) {
+    if (timeSinceLastShot >= GAME_CONSTANTS.PROJECTILE_SHOOT_INTERVAL &&
+        projectiles.length < GAME_CONSTANTS.PROJECTILE_MAX_COUNT) {
       // Calculate direction to player
       const dx = playerPos.x - swarmer.x;
       const dy = playerPos.y - swarmer.y;

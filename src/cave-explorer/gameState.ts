@@ -363,15 +363,14 @@ export function updateProjectiles(game: GameState): void {
     projectile.x += projectile.vx;
     projectile.y += projectile.vy;
 
-    // Remove if out of bounds
-    if (projectile.x < 0 || projectile.x > game.world.width ||
-        projectile.y < 0 || projectile.y > game.world.height) {
-      game.projectiles.splice(i, 1);
-      continue;
-    }
+    // Remove if out of bounds or too far from player (optimization)
+    const dx = projectile.x - game.player.x;
+    const dy = projectile.y - game.player.y;
+    const distToPlayer = Math.sqrt(dx * dx + dy * dy);
 
-    // Check collision with rocks
-    if (checkRockCollision(projectile.x, projectile.y, game.world.rocks, projectile.radius * 2, projectile.radius * 2)) {
+    if (projectile.x < 0 || projectile.x > game.world.width ||
+        projectile.y < 0 || projectile.y > game.world.height ||
+        distToPlayer > 2000) {
       game.projectiles.splice(i, 1);
     }
   }
