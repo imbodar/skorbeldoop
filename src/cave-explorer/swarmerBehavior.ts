@@ -1,11 +1,13 @@
-import { Swarmer, Rock, Point } from './types';
+import { Swarmer, Rock, Point, Projectile } from './types';
 import { GAME_CONSTANTS } from './constants';
 import { checkRockCollision } from './physics';
 
 export function updateSwarmers(
   swarmers: Swarmer[],
   playerPos: Point,
-  rocks: Rock[]
+  rocks: Rock[],
+  projectiles: Projectile[],
+  frameCount: number
 ): void {
   swarmers.forEach(swarmer => {
     const distToPlayer = Math.sqrt(
@@ -17,6 +19,28 @@ export function updateSwarmers(
       swarmer.x += swarmer.vx * 0.3;
       swarmer.y += swarmer.vy * 0.3;
       return;
+    }
+
+    // Shoot projectiles at player
+    const timeSinceLastShot = frameCount - swarmer.lastShootTime;
+    if (timeSinceLastShot >= GAME_CONSTANTS.PROJECTILE_SHOOT_INTERVAL) {
+      // Calculate direction to player
+      const dx = playerPos.x - swarmer.x;
+      const dy = playerPos.y - swarmer.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist > 0) {
+        // Create projectile
+        const projectile: Projectile = {
+          x: swarmer.x,
+          y: swarmer.y,
+          vx: (dx / dist) * GAME_CONSTANTS.PROJECTILE_SPEED,
+          vy: (dy / dist) * GAME_CONSTANTS.PROJECTILE_SPEED,
+          radius: GAME_CONSTANTS.PROJECTILE_RADIUS
+        };
+        projectiles.push(projectile);
+        swarmer.lastShootTime = frameCount;
+      }
     }
 
     // Gentle attraction to player

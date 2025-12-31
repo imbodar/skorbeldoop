@@ -44,6 +44,7 @@ export function renderGame(
   drawShellFragments(ctx, game, rayEndpoints);
   drawLeviathans(ctx, game, rayEndpoints);
   drawSwarmers(ctx, game, rayEndpoints);
+  drawProjectiles(ctx, game);
   drawPlayer(ctx, game);
 
   ctx.restore();
@@ -619,6 +620,41 @@ function drawSwarmers(
     ctx.lineTo(0, swarmerSize);
     ctx.lineTo(0, -swarmerSize);
     ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+  });
+}
+
+function drawProjectiles(
+  ctx: CanvasRenderingContext2D,
+  game: GameState
+): void {
+  game.projectiles.forEach(projectile => {
+    // Draw glowing circular projectile
+    ctx.save();
+    ctx.translate(projectile.x, projectile.y);
+
+    // Outer glow
+    const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, projectile.radius * 3);
+    glowGradient.addColorStop(0, 'rgba(0, 217, 255, 0.8)');
+    glowGradient.addColorStop(0.5, 'rgba(0, 217, 255, 0.4)');
+    glowGradient.addColorStop(1, 'rgba(0, 217, 255, 0)');
+    ctx.fillStyle = glowGradient;
+    ctx.beginPath();
+    ctx.arc(0, 0, projectile.radius * 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Core projectile
+    ctx.fillStyle = '#00d9ff';
+    ctx.beginPath();
+    ctx.arc(0, 0, projectile.radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Inner bright core
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(0, 0, projectile.radius * 0.5, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();
