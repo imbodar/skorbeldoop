@@ -4,6 +4,7 @@ import { checkRockCollision } from './physics';
 import { spawnBoid } from './boidGenerator';
 import { updateBoids } from './boidBehavior';
 import { updateLeviathans } from './leviathanBehavior';
+import { updateSwarmers } from './swarmerBehavior';
 
 export function initializePlayer(): Player {
   return {
@@ -295,6 +296,7 @@ export function updateGame(game: GameState): void {
     game.boids,
     game.world.rocks
   );
+  updateSwarmers(game.swarmers, { x: game.player.x, y: game.player.y }, game.world.rocks);
   updateFoodOrbs(game);
   checkBoidCollisions(game);
   checkFoodOrbCollisions(game);

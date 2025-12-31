@@ -4,6 +4,7 @@ import { GAME_CONSTANTS } from './constants';
 import { generateRocks } from './worldGenerator';
 import { generateBoids } from './boidGenerator';
 import { generateLeviathans, spawnLeviathan } from './leviathanGenerator';
+import { spawnSwarmer } from './swarmerGenerator';
 import { initializePlayer, updateGame } from './gameState';
 import { renderGame } from './renderer';
 
@@ -35,7 +36,8 @@ export default function CaveExplorer() {
       previousRayEndpoints: [],
       boids: [],
       leviathans: [],
-      foodOrbs: []
+      foodOrbs: [],
+      swarmers: []
     };
 
     // Store game reference
@@ -106,6 +108,23 @@ export default function CaveExplorer() {
     }
   };
 
+  const handleSpawnSwarmer = () => {
+    if (gameRef.current) {
+      const spawned = spawnSwarmer(
+        { x: gameRef.current.player.x, y: gameRef.current.player.y },
+        gameRef.current.world.rocks,
+        true
+      );
+
+      if (spawned) {
+        gameRef.current.swarmers.push(spawned);
+        console.log('Swarmer spawned nearby!');
+      } else {
+        console.log('Could not find valid spawn location');
+      }
+    }
+  };
+
   return (
     <div style={{
       display: 'flex',
@@ -167,6 +186,32 @@ export default function CaveExplorer() {
           }}
         >
           Spawn Giant Fish
+        </button>
+        <button
+          onClick={handleSpawnSwarmer}
+          style={{
+            padding: '10px 20px',
+            fontSize: '14px',
+            fontFamily: 'monospace',
+            background: '#ffd700',
+            color: '#0f0f1e',
+            border: '2px solid #daa520',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            boxShadow: '0 0 15px rgba(255, 215, 0, 0.3)',
+            transition: 'all 0.2s'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = '#ffed4e';
+            e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 215, 0, 0.5)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = '#ffd700';
+            e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.3)';
+          }}
+        >
+          Spawn Swarmer
         </button>
         <div style={{
           color: '#aaaaaa',

@@ -64,6 +64,17 @@ export interface Leviathan {
   dashCount: number;
 }
 
+export interface Swarmer {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  vx: number;
+  vy: number;
+  rotation: number;
+  trail: Array<{ x: number; y: number }>;
+}
+
 export interface World {
   width: number;
   height: number;
@@ -85,6 +96,7 @@ export interface GameState {
   boids: Boid[];
   leviathans: Leviathan[];
   foodOrbs: FoodOrb[];
+  swarmers: Swarmer[];
 }
 
 export interface Point {
