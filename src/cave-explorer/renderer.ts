@@ -363,8 +363,10 @@ function drawLeviathans(
         const alpha = age * age * 0.4;
         const size = 6 + age * 18;
 
-        const color = levi.isGolden
-          ? `rgba(255, 0, 0, ${alpha})`
+        // Use darker red if leviathan has been hit
+        const hasBeenHit = levi.health < levi.maxHealth;
+        const color = hasBeenHit
+          ? `rgba(139, 0, 0, ${alpha})`
           : `rgba(255, 0, 0, ${alpha})`;
         ctx.fillStyle = color;
         ctx.beginPath();
@@ -378,10 +380,11 @@ function drawLeviathans(
 
     // Glow effect
     const leviGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 60);
-    if (levi.isGolden) {
-      leviGradient.addColorStop(0, 'rgba(255, 0, 0, 0.4)');
-      leviGradient.addColorStop(0.5, 'rgba(255, 0, 0, 0.2)');
-      leviGradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+    const hasBeenHit = levi.health < levi.maxHealth;
+    if (hasBeenHit) {
+      leviGradient.addColorStop(0, 'rgba(139, 0, 0, 0.4)');
+      leviGradient.addColorStop(0.5, 'rgba(139, 0, 0, 0.2)');
+      leviGradient.addColorStop(1, 'rgba(139, 0, 0, 0)');
     } else {
       leviGradient.addColorStop(0, 'rgba(255, 0, 0, 0.4)');
       leviGradient.addColorStop(0.5, 'rgba(255, 0, 0, 0.2)');
@@ -431,7 +434,8 @@ function drawLeviathans(
     const leviSize = levi.height / 2;
     const leviHeight = leviSize * Math.sqrt(3);
 
-    ctx.fillStyle = levi.isGolden ? '#ff0000' : '#ff0000';
+    // Use darker red if leviathan has been hit
+    ctx.fillStyle = (levi.health < levi.maxHealth) ? '#8b0000' : '#ff0000';
     ctx.beginPath();
     ctx.moveTo(leviHeight, 0);
     ctx.lineTo(0, leviSize);
