@@ -42,7 +42,7 @@ export function renderGame(ctx: CanvasRenderingContext2D, game: GameState): void
   ctx.strokeRect(0, 0, game.world.width, game.world.height);
 
   // Draw after-image trail
-  for (let i = 0; i < GAME_CONSTANTS.PLAYER_TRAIL_LENGTH; i += 2) {
+  for (let i = 0; i < GAME_CONSTANTS.PLAYER_TRAIL_LENGTH; i += 1) {
     const idx = (player.trailIndex + i) % GAME_CONSTANTS.PLAYER_TRAIL_LENGTH;
     const point = player.trail[idx];
 
@@ -53,7 +53,7 @@ export function renderGame(ctx: CanvasRenderingContext2D, game: GameState): void
       ctx.save();
       ctx.globalAlpha = alpha;
       ctx.translate(point.x, point.y);
-      ctx.rotate(player.rotation);
+      ctx.rotate(point.rotation);
 
       // Draw semi-transparent rounded rectangle
       ctx.fillStyle = '#00ffff';

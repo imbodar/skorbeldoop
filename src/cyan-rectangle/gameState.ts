@@ -5,7 +5,7 @@ export function initializePlayer(): Player {
   // Pre-allocate trail array for circular buffer
   const trail = new Array(GAME_CONSTANTS.PLAYER_TRAIL_LENGTH);
   for (let i = 0; i < GAME_CONSTANTS.PLAYER_TRAIL_LENGTH; i++) {
-    trail[i] = { x: 0, y: 0 };
+    trail[i] = { x: 0, y: 0, rotation: 0 };
   }
 
   return {
@@ -55,6 +55,7 @@ export function updatePlayer(game: GameState): void {
   if (Math.abs(player.speed) > 0.1) {
     player.trail[player.trailIndex].x = player.x;
     player.trail[player.trailIndex].y = player.y;
+    player.trail[player.trailIndex].rotation = player.rotation;
     player.trailIndex = (player.trailIndex + 1) % GAME_CONSTANTS.PLAYER_TRAIL_LENGTH;
   }
 
