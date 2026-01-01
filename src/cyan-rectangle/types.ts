@@ -38,14 +38,21 @@ export interface VoronoiRegion {
   isRock: boolean;
 }
 
+export interface BoidTrailPoint {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  alpha: number;
+}
+
 export interface Boid {
   x: number;
   y: number;
   vx: number;
   vy: number;
   size: number;
-  trail: Array<{ x: number; y: number }>;
-  trailIndex: number;
+  trail: BoidTrailPoint[];
 }
 
 export interface GameState {

@@ -131,10 +131,22 @@ export function updateBoids(
     const newY = boid.y + boid.vy;
 
     if (!isInRock(newX, newY, rocks)) {
-      // Update trail using circular buffer
-      boid.trail[boid.trailIndex].x = boid.x;
-      boid.trail[boid.trailIndex].y = boid.y;
-      boid.trailIndex = (boid.trailIndex + 1) % GAME_CONSTANTS.BOID_TRAIL_LENGTH;
+      // Add trail point when moving (similar to player trail)
+      const currentSpeed = Math.sqrt(boid.vx * boid.vx + boid.vy * boid.vy);
+      if (currentSpeed > 0.5) {
+        boid.trail.push({
+          x: boid.x,
+          y: boid.y,
+          vx: boid.vx,
+          vy: boid.vy,
+          alpha: 1
+        });
+
+        // Cap trail length
+        if (boid.trail.length > GAME_CONSTANTS.BOID_TRAIL_LENGTH) {
+          boid.trail.shift();
+        }
+      }
 
       boid.x = newX;
       boid.y = newY;
@@ -143,6 +155,11 @@ export function updateBoids(
       boid.vx *= -0.8;
       boid.vy *= -0.8;
     }
+
+    // Fade trail over time (like player trail)
+    boid.trail.forEach((point, i) => {
+      point.alpha = i / boid.trail.length;
+    });
 
     // Wrap around world
     if (boid.x < 0) boid.x = GAME_CONSTANTS.WORLD_WIDTH;

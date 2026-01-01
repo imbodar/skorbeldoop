@@ -216,19 +216,17 @@ export default function CyanRectangle() {
 
       // Draw boids
       game.boids.forEach(boid => {
-        // Draw trail
+        // Draw trail (using alpha from trail point like player trail)
         if (boid.trail && boid.trail.length > 0) {
-          for (let i = 0; i < boid.trail.length; i++) {
-            const trailPos = boid.trail[i];
-            const age = i / boid.trail.length;
-            const alpha = age * age * 0.4;
-            const size = 2 + age * 6;
+          boid.trail.forEach(trailPoint => {
+            const alpha = trailPoint.alpha * 0.4;
+            const size = 2 + trailPoint.alpha * 6;
 
             ctx.fillStyle = `rgba(255, 105, 180, ${alpha})`;
             ctx.beginPath();
-            ctx.arc(trailPos.x, trailPos.y, size, 0, Math.PI * 2);
+            ctx.arc(trailPoint.x, trailPoint.y, size, 0, Math.PI * 2);
             ctx.fill();
-          }
+          });
         }
 
         // Draw boid with glow
