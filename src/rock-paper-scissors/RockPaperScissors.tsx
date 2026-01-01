@@ -552,7 +552,6 @@ const RockPaperScissors = () => {
             backgroundColor: CHOICE_COLORS[gameState.player1Entity.choice],
             border: gameState.player1Entity.choice === 'paper' ? '3px solid #ccc' : 'none',
             boxShadow: `0 0 20px ${PLAYER_COLORS.player1}`,
-            transition: 'all 0.05s linear',
           }} />
 
           {/* Player 1 Label */}
@@ -584,7 +583,6 @@ const RockPaperScissors = () => {
             backgroundColor: CHOICE_COLORS[gameState.player2Entity.choice],
             border: gameState.player2Entity.choice === 'paper' ? '3px solid #ccc' : 'none',
             boxShadow: `0 0 20px ${PLAYER_COLORS.player2}`,
-            transition: 'all 0.05s linear',
           }} />
 
           {/* Player 2 Label */}
