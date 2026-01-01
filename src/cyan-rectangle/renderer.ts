@@ -48,7 +48,8 @@ export function renderGame(ctx: CanvasRenderingContext2D, game: GameState): void
 
     if (point.x !== 0 || point.y !== 0) {
       const age = i / GAME_CONSTANTS.PLAYER_TRAIL_LENGTH;
-      const alpha = age * 0.2;
+      // Smooth easing function for gradual fade (quadratic ease-in)
+      const alpha = Math.pow(age, 2) * 0.2;
 
       ctx.save();
       ctx.globalAlpha = alpha;
