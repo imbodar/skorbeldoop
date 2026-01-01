@@ -72,11 +72,9 @@ export function updatePlayer(game: GameState): void {
     }
 
     // Update trail (circular buffer - no shift needed!)
-    if (Math.abs(player.speed) > 0.1) {
-      player.trail[player.trailIndex].x = player.x;
-      player.trail[player.trailIndex].y = player.y;
-      player.trailIndex = (player.trailIndex + 1) % GAME_CONSTANTS.PLAYER_TRAIL_LENGTH;
-    }
+    player.trail[player.trailIndex].x = player.x;
+    player.trail[player.trailIndex].y = player.y;
+    player.trailIndex = (player.trailIndex + 1) % GAME_CONSTANTS.PLAYER_TRAIL_LENGTH;
 
     // Keep in bounds
     player.x = Math.max(player.width, Math.min(game.world.width - player.width, player.x));
