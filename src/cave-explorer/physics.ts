@@ -11,6 +11,17 @@ export function checkRockCollision(
   for (const rock of rocks) {
     const dx = x - rock.x;
     const dy = y - rock.y;
+
+    // Pre-filter: quick distance check before expensive rotation calculation
+    // Use approximate bounding circle radius (diagonal of rock + entity + margin)
+    const maxDimension = Math.max(rock.width, rock.height);
+    const boundingRadius = (maxDimension / 2 + Math.max(width, height) / 2 + margin) * 1.5; // 1.5 = sqrt(2) buffer
+    const distSq = dx * dx + dy * dy;
+
+    // Skip this rock if it's too far
+    if (distSq > boundingRadius * boundingRadius) continue;
+
+    // Close enough - do expensive rotation calculation
     const cos = Math.cos(-rock.rotation);
     const sin = Math.sin(-rock.rotation);
     const localX = dx * cos - dy * sin;

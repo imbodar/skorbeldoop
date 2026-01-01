@@ -7,6 +7,11 @@ import { updateLeviathans } from './leviathanBehavior';
 import { updateSwarmers } from './swarmerBehavior';
 
 export function initializePlayer(): Player {
+  // Pre-allocate trail array for circular buffer (performance optimization)
+  const trail = new Array(GAME_CONSTANTS.PLAYER_TRAIL_LENGTH);
+  for (let i = 0; i < GAME_CONSTANTS.PLAYER_TRAIL_LENGTH; i++) {
+    trail[i] = { x: 0, y: 0 };
+  }
   return {
     x: GAME_CONSTANTS.WORLD_START_X,
     y: GAME_CONSTANTS.WORLD_START_Y,
@@ -20,7 +25,8 @@ export function initializePlayer(): Player {
     rotationSpeed: GAME_CONSTANTS.PLAYER_ROTATION_SPEED,
     hunger: GAME_CONSTANTS.PLAYER_MAX_HUNGER,
     maxHunger: GAME_CONSTANTS.PLAYER_MAX_HUNGER,
-    trail: [],
+    trail,
+    trailIndex: 0,
     isDead: false,
     invincible: false,
     invincibilityTimer: 0,
@@ -65,12 +71,11 @@ export function updatePlayer(game: GameState): void {
       player.y = newY;
     }
 
-    // Update trail
+    // Update trail (circular buffer - no shift needed!)
     if (Math.abs(player.speed) > 0.1) {
-      player.trail.push({ x: player.x, y: player.y });
-      if (player.trail.length > GAME_CONSTANTS.PLAYER_TRAIL_LENGTH) {
-        player.trail.shift();
-      }
+      player.trail[player.trailIndex].x = player.x;
+      player.trail[player.trailIndex].y = player.y;
+      player.trailIndex = (player.trailIndex + 1) % GAME_CONSTANTS.PLAYER_TRAIL_LENGTH;
     }
 
     // Keep in bounds

@@ -28,6 +28,11 @@ export function spawnLeviathan(
     if (!checkRockCollision(x, y, rocks, leviathanWidth, leviathanHeight) &&
         !hasRocksNearby(x, y, rocks, 400)) {
       if (nearPlayer || distToPlayer > 800) {
+        // Pre-allocate trail array for circular buffer (performance optimization)
+        const trail = new Array(GAME_CONSTANTS.LEVIATHAN_TRAIL_LENGTH);
+        for (let i = 0; i < GAME_CONSTANTS.LEVIATHAN_TRAIL_LENGTH; i++) {
+          trail[i] = { x: 0, y: 0 };
+        }
         return {
           x,
           y,
@@ -36,7 +41,8 @@ export function spawnLeviathan(
           vx: (Math.random() - 0.5) * 1,
           vy: (Math.random() - 0.5) * 1,
           rotation: Math.random() * Math.PI * 2,
-          trail: [],
+          trail,
+          trailIndex: 0,
           isCharging: false,
           chargeTimer: 0,
           chargeDirection: { x: 0, y: 0 },

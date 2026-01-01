@@ -28,6 +28,11 @@ export function spawnSwarmer(
     if (!checkRockCollision(x, y, rocks, swarmerWidth, swarmerHeight) &&
         !hasRocksNearby(x, y, rocks, 400)) {
       if (nearPlayer || distToPlayer > 800) {
+        // Pre-allocate trail array for circular buffer (performance optimization)
+        const trail = new Array(GAME_CONSTANTS.SWARMER_TRAIL_LENGTH);
+        for (let i = 0; i < GAME_CONSTANTS.SWARMER_TRAIL_LENGTH; i++) {
+          trail[i] = { x: 0, y: 0 };
+        }
         return {
           x,
           y,
@@ -36,7 +41,8 @@ export function spawnSwarmer(
           vx: (Math.random() - 0.5) * 1,
           vy: (Math.random() - 0.5) * 1,
           rotation: Math.random() * Math.PI * 2,
-          trail: [],
+          trail,
+          trailIndex: 0,
           lastShootTime: 0
         };
       }

@@ -19,13 +19,19 @@ export function generateBoids(
     const y = Math.random() * GAME_CONSTANTS.WORLD_HEIGHT;
 
     if (!checkRockCollision(x, y, rocks) && !isVisible(x, y)) {
+      // Pre-allocate trail array for circular buffer (performance optimization)
+      const trail = new Array(GAME_CONSTANTS.BOID_TRAIL_LENGTH);
+      for (let i = 0; i < GAME_CONSTANTS.BOID_TRAIL_LENGTH; i++) {
+        trail[i] = { x: 0, y: 0 };
+      }
       boids.push({
         x,
         y,
         vx: (Math.random() - 0.5) * 2,
         vy: (Math.random() - 0.5) * 2,
         size: GAME_CONSTANTS.BOID_SIZE,
-        trail: []
+        trail,
+        trailIndex: 0
       });
     }
     attempts++;
@@ -46,13 +52,19 @@ export function spawnBoid(
 
     if (distToPlayer > GAME_CONSTANTS.BOID_VISIBILITY_RADIUS) {
       if (!checkRockCollision(x, y, rocks)) {
+        // Pre-allocate trail array for circular buffer (performance optimization)
+        const trail = new Array(GAME_CONSTANTS.BOID_TRAIL_LENGTH);
+        for (let i = 0; i < GAME_CONSTANTS.BOID_TRAIL_LENGTH; i++) {
+          trail[i] = { x: 0, y: 0 };
+        }
         return {
           x,
           y,
           vx: (Math.random() - 0.5) * 2,
           vy: (Math.random() - 0.5) * 2,
           size: GAME_CONSTANTS.BOID_SIZE,
-          trail: []
+          trail,
+          trailIndex: 0
         };
       }
     }
