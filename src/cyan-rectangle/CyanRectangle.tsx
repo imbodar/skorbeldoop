@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { GameState } from './types';
+import { GameState, Rock } from './types';
 import { GAME_CONSTANTS } from './constants';
+import { generateVoronoiWorld, findSafeSpawnPosition } from './worldGenerator';
 
 export default function CyanRectangle() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -13,11 +14,15 @@ export default function CyanRectangle() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Generate voronoi world
+    const { rocks, regions } = generateVoronoiWorld();
+    const spawnPos = findSafeSpawnPosition(rocks);
+
     // Initialize game state
     const game: GameState = {
       player: {
-        x: GAME_CONSTANTS.WORLD_START_X,
-        y: GAME_CONSTANTS.WORLD_START_Y,
+        x: spawnPos.x,
+        y: spawnPos.y,
         rotation: 0,
         speed: 0,
         width: GAME_CONSTANTS.PLAYER_WIDTH,
@@ -28,12 +33,14 @@ export default function CyanRectangle() {
         height: GAME_CONSTANTS.WORLD_HEIGHT,
       },
       camera: {
-        x: GAME_CONSTANTS.WORLD_START_X,
-        y: GAME_CONSTANTS.WORLD_START_Y,
+        x: spawnPos.x,
+        y: spawnPos.y,
         zoom: GAME_CONSTANTS.CAMERA_ZOOM,
       },
       keys: {},
       trail: [],
+      rocks,
+      regions,
     };
 
     gameRef.current = game;
@@ -49,6 +56,46 @@ export default function CyanRectangle() {
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+
+    // Collision detection helper
+    const checkCollision = (x: number, y: number, width: number, height: number, rotation: number, rocks: Rock[]): boolean => {
+      // Get the four corners of the rotated rectangle
+      const halfWidth = width / 2;
+      const halfHeight = height / 2;
+
+      const corners = [
+        { x: -halfWidth, y: -halfHeight },
+        { x: halfWidth, y: -halfHeight },
+        { x: halfWidth, y: halfHeight },
+        { x: -halfWidth, y: halfHeight },
+      ];
+
+      // Rotate corners and translate to player position
+      const rotatedCorners = corners.map(corner => ({
+        x: x + corner.x * Math.cos(rotation) - corner.y * Math.sin(rotation),
+        y: y + corner.x * Math.sin(rotation) + corner.y * Math.cos(rotation),
+      }));
+
+      // Check if any corner is inside a rock
+      for (const corner of rotatedCorners) {
+        for (const rock of rocks) {
+          if (corner.x >= rock.x && corner.x < rock.x + rock.width &&
+              corner.y >= rock.y && corner.y < rock.y + rock.height) {
+            return true;
+          }
+        }
+      }
+
+      // Also check center point
+      for (const rock of rocks) {
+        if (x >= rock.x && x < rock.x + rock.width &&
+            y >= rock.y && y < rock.y + rock.height) {
+          return true;
+        }
+      }
+
+      return false;
+    };
 
     // Game loop
     let animationId: number;
@@ -75,14 +122,23 @@ export default function CyanRectangle() {
       const moveX = Math.sin(game.player.rotation) * game.player.speed;
       const moveY = -Math.cos(game.player.rotation) * game.player.speed;
 
-      game.player.x += moveX;
-      game.player.y += moveY;
-
       // Keep player in bounds (use half dimensions since player is drawn from center)
       const halfWidth = game.player.width / 2;
       const halfHeight = game.player.height / 2;
-      game.player.x = Math.max(halfWidth, Math.min(game.world.width - halfWidth, game.player.x));
-      game.player.y = Math.max(halfHeight, Math.min(game.world.height - halfHeight, game.player.y));
+
+      // Check X movement separately
+      const newX = game.player.x + moveX;
+      const boundedX = Math.max(halfWidth, Math.min(game.world.width - halfWidth, newX));
+      if (!checkCollision(boundedX, game.player.y, game.player.width, game.player.height, game.player.rotation, game.rocks)) {
+        game.player.x = boundedX;
+      }
+
+      // Check Y movement separately
+      const newY = game.player.y + moveY;
+      const boundedY = Math.max(halfHeight, Math.min(game.world.height - halfHeight, newY));
+      if (!checkCollision(game.player.x, boundedY, game.player.width, game.player.height, game.player.rotation, game.rocks)) {
+        game.player.y = boundedY;
+      }
 
       // Trail tracking
       const currentSpeed = Math.abs(game.player.speed);
@@ -142,6 +198,15 @@ export default function CyanRectangle() {
       ctx.strokeStyle = '#00ffff';
       ctx.lineWidth = 4;
       ctx.strokeRect(0, 0, game.world.width, game.world.height);
+
+      // Draw rocks
+      ctx.fillStyle = '#4a4a4a';
+      ctx.strokeStyle = '#2a2a2a';
+      ctx.lineWidth = 2;
+      game.rocks.forEach(rock => {
+        ctx.fillRect(rock.x, rock.y, rock.width, rock.height);
+        ctx.strokeRect(rock.x, rock.y, rock.width, rock.height);
+      });
 
       // Draw trail
       game.trail.forEach((point) => {

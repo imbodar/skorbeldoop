@@ -20,4 +20,9 @@ export const GAME_CONSTANTS = {
   // Trail effect
   MAX_TRAIL_LENGTH: 50,
   TRAIL_MIN_SPEED: 0.1,
+
+  // Voronoi world generation
+  VORONOI_REGIONS: 100, // Total regions (50 will be rock, 50 will be air)
+  VORONOI_GRID_SIZE: 80, // Size of each rock tile
+  CLEAR_RADIUS: 400, // Radius around spawn that's guaranteed to be clear
 };

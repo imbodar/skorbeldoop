@@ -25,10 +25,25 @@ export interface Camera {
   zoom: number;
 }
 
+export interface Rock {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface VoronoiRegion {
+  x: number;
+  y: number;
+  isRock: boolean;
+}
+
 export interface GameState {
   player: Player;
   world: World;
   camera: Camera;
   keys: Record<string, boolean>;
   trail: TrailPoint[];
+  rocks: Rock[];
+  regions: VoronoiRegion[];
 }
