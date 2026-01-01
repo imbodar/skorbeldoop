@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { GameState, Choice, GameResult } from './types';
-import { CHOICE_EMOJI, PLAYER_COLORS, CHOICE_HP } from './constants';
+import { CHOICE_EMOJI, PLAYER_COLORS, CHOICE_HP, CHOICE_SPEED } from './constants';
 
 // Health Bar Component
 const HealthBar = ({ currentHP, maxHP, color }: { currentHP: number; maxHP: number; color: string }) => {
@@ -50,7 +50,11 @@ const RockPaperScissors = () => {
     phase: 'selection',
     player1HP: 0,
     player2HP: 0,
+    player1Position: { x: 100, y: 200 },
+    player2Position: { x: 700, y: 200 },
   });
+
+  const keysPressed = useRef<Set<string>>(new Set());
 
 
   const determineWinner = (p1: Choice, p2: Choice): GameResult => {
@@ -77,6 +81,8 @@ const RockPaperScissors = () => {
       phase: 'selection',
       player1HP: 0,
       player2HP: 0,
+      player1Position: { x: 100, y: 200 },
+      player2Position: { x: 700, y: 200 },
     }));
   }, []);
 
@@ -96,6 +102,8 @@ const RockPaperScissors = () => {
           phase: 'arena' as const,
           player1HP: CHOICE_HP[newState.player1Choice],
           player2HP: CHOICE_HP[newState.player2Choice],
+          player1Position: { x: 100, y: 200 },
+          player2Position: { x: 700, y: 200 },
         };
       }
 
@@ -118,6 +126,50 @@ const RockPaperScissors = () => {
       };
     });
   }, []);
+
+  // Movement loop for arena phase
+  useEffect(() => {
+    if (gameState.phase !== 'arena') return;
+
+    const gameLoop = setInterval(() => {
+      setGameState((prev) => {
+        if (prev.phase !== 'arena' || !prev.player1Choice || !prev.player2Choice) return prev;
+
+        const player1Speed = CHOICE_SPEED[prev.player1Choice];
+        const player2Speed = CHOICE_SPEED[prev.player2Choice];
+
+        let newPlayer1Position = { ...prev.player1Position };
+        let newPlayer2Position = { ...prev.player2Position };
+
+        // Player 1 movement (WASD)
+        if (keysPressed.current.has('w')) newPlayer1Position.y -= player1Speed;
+        if (keysPressed.current.has('s')) newPlayer1Position.y += player1Speed;
+        if (keysPressed.current.has('a')) newPlayer1Position.x -= player1Speed;
+        if (keysPressed.current.has('d')) newPlayer1Position.x += player1Speed;
+
+        // Player 2 movement (Arrow keys)
+        if (keysPressed.current.has('arrowup')) newPlayer2Position.y -= player2Speed;
+        if (keysPressed.current.has('arrowdown')) newPlayer2Position.y += player2Speed;
+        if (keysPressed.current.has('arrowleft')) newPlayer2Position.x -= player2Speed;
+        if (keysPressed.current.has('arrowright')) newPlayer2Position.x += player2Speed;
+
+        // Constrain to arena bounds (assuming 900x400 arena)
+        const avatarSize = 32; // Half of the avatar size for collision
+        newPlayer1Position.x = Math.max(avatarSize, Math.min(900 - avatarSize, newPlayer1Position.x));
+        newPlayer1Position.y = Math.max(avatarSize, Math.min(400 - avatarSize, newPlayer1Position.y));
+        newPlayer2Position.x = Math.max(avatarSize, Math.min(900 - avatarSize, newPlayer2Position.x));
+        newPlayer2Position.y = Math.max(avatarSize, Math.min(400 - avatarSize, newPlayer2Position.y));
+
+        return {
+          ...prev,
+          player1Position: newPlayer1Position,
+          player2Position: newPlayer2Position,
+        };
+      });
+    }, 1000 / 60); // 60 FPS
+
+    return () => clearInterval(gameLoop);
+  }, [gameState.phase]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -145,6 +197,11 @@ const RockPaperScissors = () => {
         }
       }
 
+      // Arena phase movement
+      if (gameState.phase === 'arena') {
+        keysPressed.current.add(key);
+      }
+
       // Space to continue to next round (only in results phase)
       if (key === ' ' && gameState.phase === 'results') {
         e.preventDefault();
@@ -152,10 +209,17 @@ const RockPaperScissors = () => {
       }
     };
 
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      keysPressed.current.delete(key);
+    };
+
     window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
   }, [handleChoice, gameState.phase, resetRound]);
 
@@ -372,74 +436,75 @@ const RockPaperScissors = () => {
       </div>
 
       <div style={{
-        width: '100%',
+        width: '900px',
         height: '400px',
         border: '4px solid #333',
         borderRadius: '15px',
         backgroundColor: '#f5f5f5',
         position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        overflow: 'hidden',
       }}>
+        {/* Player 1 Avatar */}
         <div style={{
-          display: 'flex',
-          gap: '100px',
-          fontSize: '64px',
+          position: 'absolute',
+          left: `${gameState.player1Position.x}px`,
+          top: `${gameState.player1Position.y}px`,
+          transform: 'translate(-50%, -50%)',
+          textAlign: 'center',
+          width: '120px',
         }}>
+          <div style={{ fontSize: '64px' }}>{CHOICE_EMOJI[gameState.player1Choice!]}</div>
           <div style={{
-            textAlign: 'center',
-            width: '200px',
+            fontSize: '12px',
+            color: PLAYER_COLORS.player1,
+            marginTop: '5px',
+            fontWeight: 'bold',
           }}>
-            <div>{CHOICE_EMOJI[gameState.player1Choice!]}</div>
-            <div style={{
-              fontSize: '14px',
-              color: PLAYER_COLORS.player1,
-              marginTop: '10px',
-              fontWeight: 'bold',
-            }}>
-              Player 1
-            </div>
-            <div style={{
-              fontSize: '12px',
-              color: '#666',
-              marginTop: '5px',
-              textTransform: 'capitalize',
-            }}>
-              {gameState.player1Choice}
-            </div>
-            <HealthBar
-              currentHP={gameState.player1HP}
-              maxHP={CHOICE_HP[gameState.player1Choice!]}
-              color={PLAYER_COLORS.player1}
-            />
+            P1
           </div>
+          <HealthBar
+            currentHP={gameState.player1HP}
+            maxHP={CHOICE_HP[gameState.player1Choice!]}
+            color={PLAYER_COLORS.player1}
+          />
           <div style={{
-            textAlign: 'center',
-            width: '200px',
+            fontSize: '10px',
+            color: '#666',
+            marginTop: '2px',
           }}>
-            <div>{CHOICE_EMOJI[gameState.player2Choice!]}</div>
-            <div style={{
-              fontSize: '14px',
-              color: PLAYER_COLORS.player2,
-              marginTop: '10px',
-              fontWeight: 'bold',
-            }}>
-              Player 2
-            </div>
-            <div style={{
-              fontSize: '12px',
-              color: '#666',
-              marginTop: '5px',
-              textTransform: 'capitalize',
-            }}>
-              {gameState.player2Choice}
-            </div>
-            <HealthBar
-              currentHP={gameState.player2HP}
-              maxHP={CHOICE_HP[gameState.player2Choice!]}
-              color={PLAYER_COLORS.player2}
-            />
+            Speed: {CHOICE_SPEED[gameState.player1Choice!]}
+          </div>
+        </div>
+
+        {/* Player 2 Avatar */}
+        <div style={{
+          position: 'absolute',
+          left: `${gameState.player2Position.x}px`,
+          top: `${gameState.player2Position.y}px`,
+          transform: 'translate(-50%, -50%)',
+          textAlign: 'center',
+          width: '120px',
+        }}>
+          <div style={{ fontSize: '64px' }}>{CHOICE_EMOJI[gameState.player2Choice!]}</div>
+          <div style={{
+            fontSize: '12px',
+            color: PLAYER_COLORS.player2,
+            marginTop: '5px',
+            fontWeight: 'bold',
+          }}>
+            P2
+          </div>
+          <HealthBar
+            currentHP={gameState.player2HP}
+            maxHP={CHOICE_HP[gameState.player2Choice!]}
+            color={PLAYER_COLORS.player2}
+          />
+          <div style={{
+            fontSize: '10px',
+            color: '#666',
+            marginTop: '2px',
+          }}>
+            Speed: {CHOICE_SPEED[gameState.player2Choice!]}
           </div>
         </div>
       </div>
@@ -449,8 +514,8 @@ const RockPaperScissors = () => {
         color: '#666',
         fontSize: '14px',
       }}>
-        <p>Arena phase coming soon!</p>
-        <p>Movement controls will be added in the next phase.</p>
+        <p>Player 1: Use WASD to move | Player 2: Use Arrow Keys to move</p>
+        <p>Notice how different avatars move at different speeds!</p>
       </div>
 
       {/* Temporary: Auto-transition to results for testing */}
