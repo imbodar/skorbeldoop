@@ -4,6 +4,11 @@ export type GameResult = 'player1' | 'player2' | 'tie' | null;
 
 export type GamePhase = 'selection' | 'arena' | 'results';
 
+export interface Position {
+  x: number;
+  y: number;
+}
+
 export interface GameState {
   player1Choice: Choice;
   player2Choice: Choice;
@@ -15,4 +20,6 @@ export interface GameState {
   phase: GamePhase;
   player1HP: number;
   player2HP: number;
+  player1Position: Position;
+  player2Position: Position;
 }
