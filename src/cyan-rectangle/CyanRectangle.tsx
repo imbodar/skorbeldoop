@@ -33,6 +33,7 @@ export default function CyanRectangle() {
         zoom: GAME_CONSTANTS.CAMERA_ZOOM,
       },
       keys: {},
+      trail: [],
     };
 
     gameRef.current = game;
@@ -77,16 +78,39 @@ export default function CyanRectangle() {
       game.player.x += moveX;
       game.player.y += moveY;
 
-      // Keep player in bounds
-      game.player.x = Math.max(game.player.width, Math.min(game.world.width - game.player.width, game.player.x));
-      game.player.y = Math.max(game.player.height, Math.min(game.world.height - game.player.height, game.player.y));
+      // Keep player in bounds (use half dimensions since player is drawn from center)
+      const halfWidth = game.player.width / 2;
+      const halfHeight = game.player.height / 2;
+      game.player.x = Math.max(halfWidth, Math.min(game.world.width - halfWidth, game.player.x));
+      game.player.y = Math.max(halfHeight, Math.min(game.world.height - halfHeight, game.player.y));
+
+      // Trail tracking
+      const currentSpeed = Math.abs(game.player.speed);
+      if (currentSpeed > GAME_CONSTANTS.TRAIL_MIN_SPEED) {
+        game.trail.push({
+          x: game.player.x,
+          y: game.player.y,
+          rotation: game.player.rotation,
+          alpha: 1
+        });
+
+        // Remove old trail points
+        if (game.trail.length > GAME_CONSTANTS.MAX_TRAIL_LENGTH) {
+          game.trail.shift();
+        }
+      }
+
+      // Fade trail over time
+      game.trail.forEach((point, i) => {
+        point.alpha = i / game.trail.length;
+      });
 
       // Update camera to follow player
       game.camera.x += (game.player.x - game.camera.x) * GAME_CONSTANTS.CAMERA_FOLLOW_SPEED;
       game.camera.y += (game.player.y - game.camera.y) * GAME_CONSTANTS.CAMERA_FOLLOW_SPEED;
 
       // Render
-      ctx.fillStyle = '#000000';
+      ctx.fillStyle = '#0a0a18';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Save context for camera transformation
@@ -119,6 +143,48 @@ export default function CyanRectangle() {
       ctx.lineWidth = 4;
       ctx.strokeRect(0, 0, game.world.width, game.world.height);
 
+      // Draw trail
+      game.trail.forEach((point) => {
+        const trailWidth = game.player.width * 0.7;
+        const trailHeight = game.player.height * 0.7;
+
+        ctx.save();
+        ctx.translate(point.x, point.y);
+        ctx.rotate(point.rotation);
+
+        // Draw rounded rectangle trail segment
+        const cornerRadius = 6;
+        const x = -trailWidth / 2;
+        const y = -trailHeight / 2;
+
+        ctx.beginPath();
+        ctx.moveTo(x + cornerRadius, y);
+        ctx.lineTo(x + trailWidth - cornerRadius, y);
+        ctx.arcTo(x + trailWidth, y, x + trailWidth, y + cornerRadius, cornerRadius);
+        ctx.lineTo(x + trailWidth, y + trailHeight - cornerRadius);
+        ctx.arcTo(x + trailWidth, y + trailHeight, x + trailWidth - cornerRadius, y + trailHeight, cornerRadius);
+        ctx.lineTo(x + cornerRadius, y + trailHeight);
+        ctx.arcTo(x, y + trailHeight, x, y + trailHeight - cornerRadius, cornerRadius);
+        ctx.lineTo(x, y + cornerRadius);
+        ctx.arcTo(x, y, x + cornerRadius, y, cornerRadius);
+        ctx.closePath();
+
+        ctx.fillStyle = `rgba(0, 255, 255, ${point.alpha * 0.4})`;
+        ctx.fill();
+
+        // Add glow effect
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = `rgba(0, 255, 255, ${point.alpha * 0.5})`;
+        ctx.strokeStyle = `rgba(0, 255, 255, ${point.alpha * 0.3})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.restore();
+      });
+
+      // Reset shadow for other drawing operations
+      ctx.shadowBlur = 0;
+
       // Draw player as rotated rounded cyan rectangle
       ctx.save();
       ctx.translate(game.player.x, game.player.y);
@@ -144,6 +210,11 @@ export default function CyanRectangle() {
       ctx.arcTo(x, y, x + cornerRadius, y, cornerRadius);
       ctx.closePath();
       ctx.fill();
+
+      // Add dark blue outline
+      ctx.strokeStyle = '#001540';
+      ctx.lineWidth = 2;
+      ctx.stroke();
 
       ctx.restore();
 
