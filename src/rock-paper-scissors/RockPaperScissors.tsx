@@ -223,20 +223,25 @@ const RockPaperScissors = () => {
               const keys = ['W', 'A', 'S'];
               const isSelected = gameState.player1Choice === choice;
               const isHighlighted = player1Highlight === choice;
+              const hasChosen = gameState.player1Choice !== null;
+              const showingResult = gameState.showResult;
+
+              // If player has chosen but result not shown yet, highlight all yellow
+              const hideChoice = hasChosen && !showingResult;
 
               return (
                 <div
                   key={choice}
                   style={{
                     padding: '25px',
-                    border: isSelected ? '4px solid #FFD700' : '2px solid #ddd',
+                    border: (showingResult && isSelected) ? '4px solid #FFD700' : '2px solid #ddd',
                     borderRadius: '10px',
                     textAlign: 'center',
                     fontSize: '48px',
-                    backgroundColor: isHighlighted ? '#e6f3ff' : (isSelected ? '#ffffcc' : '#fff'),
+                    backgroundColor: isHighlighted ? '#e6f3ff' : (hideChoice ? '#ffffcc' : (showingResult && isSelected ? '#ffffcc' : '#fff')),
                     transform: isHighlighted ? 'scale(1.05)' : 'scale(1)',
                     transition: 'all 0.1s ease',
-                    boxShadow: isSelected ? '0 4px 8px rgba(255, 215, 0, 0.5)' : 'none',
+                    boxShadow: (showingResult && isSelected) ? '0 4px 8px rgba(255, 215, 0, 0.5)' : 'none',
                   }}
                 >
                   <div>{CHOICE_EMOJI[choice]}</div>
@@ -251,7 +256,7 @@ const RockPaperScissors = () => {
             })}
           </div>
 
-          {gameState.player1Choice && (
+          {gameState.player1Choice && !gameState.showResult && (
             <div style={{
               marginTop: '20px',
               textAlign: 'center',
@@ -259,7 +264,18 @@ const RockPaperScissors = () => {
               color: PLAYER_COLORS.player1,
               fontWeight: 'bold',
             }}>
-              Choice locked! {CHOICE_EMOJI[gameState.player1Choice]}
+              Choice locked!
+            </div>
+          )}
+          {gameState.player1Choice && gameState.showResult && (
+            <div style={{
+              marginTop: '20px',
+              textAlign: 'center',
+              fontSize: '18px',
+              color: PLAYER_COLORS.player1,
+              fontWeight: 'bold',
+            }}>
+              You picked: {CHOICE_EMOJI[gameState.player1Choice]}
             </div>
           )}
         </div>
@@ -309,20 +325,25 @@ const RockPaperScissors = () => {
               const keys = ['↑', '←', '↓'];
               const isSelected = gameState.player2Choice === choice;
               const isHighlighted = player2Highlight === choice;
+              const hasChosen = gameState.player2Choice !== null;
+              const showingResult = gameState.showResult;
+
+              // If player has chosen but result not shown yet, highlight all yellow
+              const hideChoice = hasChosen && !showingResult;
 
               return (
                 <div
                   key={choice}
                   style={{
                     padding: '25px',
-                    border: isSelected ? '4px solid #FFD700' : '2px solid #ddd',
+                    border: (showingResult && isSelected) ? '4px solid #FFD700' : '2px solid #ddd',
                     borderRadius: '10px',
                     textAlign: 'center',
                     fontSize: '48px',
-                    backgroundColor: isHighlighted ? '#ffe6f0' : (isSelected ? '#ffffcc' : '#fff'),
+                    backgroundColor: isHighlighted ? '#ffe6f0' : (hideChoice ? '#ffffcc' : (showingResult && isSelected ? '#ffffcc' : '#fff')),
                     transform: isHighlighted ? 'scale(1.05)' : 'scale(1)',
                     transition: 'all 0.1s ease',
-                    boxShadow: isSelected ? '0 4px 8px rgba(255, 215, 0, 0.5)' : 'none',
+                    boxShadow: (showingResult && isSelected) ? '0 4px 8px rgba(255, 215, 0, 0.5)' : 'none',
                   }}
                 >
                   <div>{CHOICE_EMOJI[choice]}</div>
@@ -337,7 +358,7 @@ const RockPaperScissors = () => {
             })}
           </div>
 
-          {gameState.player2Choice && (
+          {gameState.player2Choice && !gameState.showResult && (
             <div style={{
               marginTop: '20px',
               textAlign: 'center',
@@ -345,7 +366,18 @@ const RockPaperScissors = () => {
               color: PLAYER_COLORS.player2,
               fontWeight: 'bold',
             }}>
-              Choice locked! {CHOICE_EMOJI[gameState.player2Choice]}
+              Choice locked!
+            </div>
+          )}
+          {gameState.player2Choice && gameState.showResult && (
+            <div style={{
+              marginTop: '20px',
+              textAlign: 'center',
+              fontSize: '18px',
+              color: PLAYER_COLORS.player2,
+              fontWeight: 'bold',
+            }}>
+              You picked: {CHOICE_EMOJI[gameState.player2Choice]}
             </div>
           )}
         </div>
