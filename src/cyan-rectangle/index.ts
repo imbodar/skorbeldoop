@@ -1,1 +1,0 @@
-export { CyanRectangle } from './CyanRectangle';
