@@ -201,11 +201,8 @@ export default function CyanRectangle() {
 
       // Draw rocks
       ctx.fillStyle = '#4a4a4a';
-      ctx.strokeStyle = '#2a2a2a';
-      ctx.lineWidth = 2;
       game.rocks.forEach(rock => {
         ctx.fillRect(rock.x, rock.y, rock.width, rock.height);
-        ctx.strokeRect(rock.x, rock.y, rock.width, rock.height);
       });
 
       // Draw trail
