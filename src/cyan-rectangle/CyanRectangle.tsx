@@ -18,8 +18,8 @@ export default function CyanRectangle() {
       player: {
         x: GAME_CONSTANTS.WORLD_START_X,
         y: GAME_CONSTANTS.WORLD_START_Y,
-        vx: 0,
-        vy: 0,
+        rotation: 0,
+        speed: 0,
         width: GAME_CONSTANTS.PLAYER_WIDTH,
         height: GAME_CONSTANTS.PLAYER_HEIGHT,
       },
@@ -53,40 +53,33 @@ export default function CyanRectangle() {
     let animationId: number;
 
     const gameLoop = () => {
-      // Update player movement
-      const acceleration = GAME_CONSTANTS.PLAYER_ACCELERATION;
-
-      if (game.keys['arrowup'] || game.keys['w']) {
-        game.player.vy -= acceleration;
+      // Rotation
+      if (game.keys['a'] || game.keys['arrowleft']) {
+        game.player.rotation -= GAME_CONSTANTS.PLAYER_ROTATION_SPEED;
       }
-      if (game.keys['arrowdown'] || game.keys['s']) {
-        game.player.vy += acceleration;
-      }
-      if (game.keys['arrowleft'] || game.keys['a']) {
-        game.player.vx -= acceleration;
-      }
-      if (game.keys['arrowright'] || game.keys['d']) {
-        game.player.vx += acceleration;
+      if (game.keys['d'] || game.keys['arrowright']) {
+        game.player.rotation += GAME_CONSTANTS.PLAYER_ROTATION_SPEED;
       }
 
-      // Apply friction
-      game.player.vx *= GAME_CONSTANTS.PLAYER_FRICTION;
-      game.player.vy *= GAME_CONSTANTS.PLAYER_FRICTION;
-
-      // Limit max speed
-      const speed = Math.sqrt(game.player.vx ** 2 + game.player.vy ** 2);
-      if (speed > GAME_CONSTANTS.PLAYER_MAX_SPEED) {
-        game.player.vx = (game.player.vx / speed) * GAME_CONSTANTS.PLAYER_MAX_SPEED;
-        game.player.vy = (game.player.vy / speed) * GAME_CONSTANTS.PLAYER_MAX_SPEED;
+      // Movement
+      if (game.keys['w'] || game.keys['arrowup']) {
+        game.player.speed = Math.min(game.player.speed + GAME_CONSTANTS.PLAYER_ACCELERATION, GAME_CONSTANTS.PLAYER_MAX_SPEED);
+      } else if (game.keys['s'] || game.keys['arrowdown']) {
+        game.player.speed = Math.max(game.player.speed - GAME_CONSTANTS.PLAYER_ACCELERATION, -GAME_CONSTANTS.PLAYER_MAX_SPEED / 2);
+      } else {
+        game.player.speed *= GAME_CONSTANTS.PLAYER_FRICTION;
       }
 
-      // Update position
-      game.player.x += game.player.vx;
-      game.player.y += game.player.vy;
+      // Update position based on rotation and speed
+      const moveX = Math.sin(game.player.rotation) * game.player.speed;
+      const moveY = -Math.cos(game.player.rotation) * game.player.speed;
+
+      game.player.x += moveX;
+      game.player.y += moveY;
 
       // Keep player in bounds
-      game.player.x = Math.max(game.player.width / 2, Math.min(game.world.width - game.player.width / 2, game.player.x));
-      game.player.y = Math.max(game.player.height / 2, Math.min(game.world.height - game.player.height / 2, game.player.y));
+      game.player.x = Math.max(game.player.width, Math.min(game.world.width - game.player.width, game.player.x));
+      game.player.y = Math.max(game.player.height, Math.min(game.world.height - game.player.height, game.player.y));
 
       // Update camera to follow player
       game.camera.x += (game.player.x - game.camera.x) * GAME_CONSTANTS.CAMERA_FOLLOW_SPEED;
@@ -126,14 +119,33 @@ export default function CyanRectangle() {
       ctx.lineWidth = 4;
       ctx.strokeRect(0, 0, game.world.width, game.world.height);
 
-      // Draw player as pure cyan rectangle
+      // Draw player as rotated rounded cyan rectangle
+      ctx.save();
+      ctx.translate(game.player.x, game.player.y);
+      ctx.rotate(game.player.rotation);
       ctx.fillStyle = '#00ffff';
-      ctx.fillRect(
-        game.player.x - game.player.width / 2,
-        game.player.y - game.player.height / 2,
-        game.player.width,
-        game.player.height
-      );
+
+      // Draw rounded rectangle
+      const cornerRadius = 8;
+      const x = -game.player.width / 2;
+      const y = -game.player.height / 2;
+      const width = game.player.width;
+      const height = game.player.height;
+
+      ctx.beginPath();
+      ctx.moveTo(x + cornerRadius, y);
+      ctx.lineTo(x + width - cornerRadius, y);
+      ctx.arcTo(x + width, y, x + width, y + cornerRadius, cornerRadius);
+      ctx.lineTo(x + width, y + height - cornerRadius);
+      ctx.arcTo(x + width, y + height, x + width - cornerRadius, y + height, cornerRadius);
+      ctx.lineTo(x + cornerRadius, y + height);
+      ctx.arcTo(x, y + height, x, y + height - cornerRadius, cornerRadius);
+      ctx.lineTo(x, y + cornerRadius);
+      ctx.arcTo(x, y, x + cornerRadius, y, cornerRadius);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
 
       // Restore context
       ctx.restore();
@@ -142,7 +154,8 @@ export default function CyanRectangle() {
       ctx.fillStyle = '#00ffff';
       ctx.font = '16px monospace';
       ctx.fillText(`Position: (${Math.round(game.player.x)}, ${Math.round(game.player.y)})`, 10, 25);
-      ctx.fillText(`Speed: ${Math.round(speed * 10) / 10}`, 10, 50);
+      ctx.fillText(`Speed: ${Math.round(Math.abs(game.player.speed) * 10) / 10}`, 10, 50);
+      ctx.fillText(`Rotation: ${Math.round((game.player.rotation * 180 / Math.PI) % 360)}°`, 10, 75);
 
       animationId = requestAnimationFrame(gameLoop);
     };
@@ -190,7 +203,7 @@ export default function CyanRectangle() {
         textAlign: 'center',
         fontSize: '14px'
       }}>
-        Use WASD or Arrow Keys to move the cyan rectangle
+        W/↑: Forward • S/↓: Backward • A/←: Rotate Left • D/→: Rotate Right
       </div>
     </div>
   );
