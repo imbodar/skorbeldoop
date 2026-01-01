@@ -122,22 +122,22 @@ export default function CyanRectangle() {
       const moveX = Math.sin(game.player.rotation) * game.player.speed;
       const moveY = -Math.cos(game.player.rotation) * game.player.speed;
 
-      const newX = game.player.x + moveX;
-      const newY = game.player.y + moveY;
-
       // Keep player in bounds (use half dimensions since player is drawn from center)
       const halfWidth = game.player.width / 2;
       const halfHeight = game.player.height / 2;
-      const boundedX = Math.max(halfWidth, Math.min(game.world.width - halfWidth, newX));
-      const boundedY = Math.max(halfHeight, Math.min(game.world.height - halfHeight, newY));
 
-      // Check collision before moving
-      if (!checkCollision(boundedX, boundedY, game.player.width, game.player.height, game.player.rotation, game.rocks)) {
+      // Check X movement separately
+      const newX = game.player.x + moveX;
+      const boundedX = Math.max(halfWidth, Math.min(game.world.width - halfWidth, newX));
+      if (!checkCollision(boundedX, game.player.y, game.player.width, game.player.height, game.player.rotation, game.rocks)) {
         game.player.x = boundedX;
+      }
+
+      // Check Y movement separately
+      const newY = game.player.y + moveY;
+      const boundedY = Math.max(halfHeight, Math.min(game.world.height - halfHeight, newY));
+      if (!checkCollision(game.player.x, boundedY, game.player.width, game.player.height, game.player.rotation, game.rocks)) {
         game.player.y = boundedY;
-      } else {
-        // If collision, stop the player
-        game.player.speed = 0;
       }
 
       // Trail tracking
