@@ -25,4 +25,9 @@ export const GAME_CONSTANTS = {
   VORONOI_REGIONS: 100, // Total regions (50 will be rock, 50 will be air)
   VORONOI_GRID_SIZE: 80, // Size of each rock tile
   CLEAR_RADIUS: 400, // Radius around spawn that's guaranteed to be clear
+
+  // Line of sight and shadows
+  LINE_OF_SIGHT_RAYS: 180,
+  LINE_OF_SIGHT_DISTANCE: 800,
+  SHADOW_OPACITY: 0.88,
 };

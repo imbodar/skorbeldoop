@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { GameState, Rock } from './types';
 import { GAME_CONSTANTS } from './constants';
 import { generateVoronoiWorld, findSafeSpawnPosition } from './worldGenerator';
+import { calculateLineOfSight, drawShadows } from './renderer';
 
 export default function CyanRectangle() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -41,6 +42,7 @@ export default function CyanRectangle() {
       trail: [],
       rocks,
       regions,
+      previousRayEndpoints: [],
     };
 
     gameRef.current = game;
@@ -207,6 +209,10 @@ export default function CyanRectangle() {
         ctx.fillRect(rock.x, rock.y, rock.width, rock.height);
         ctx.strokeRect(rock.x, rock.y, rock.width, rock.height);
       });
+
+      // Calculate line of sight and draw shadows
+      const rayEndpoints = calculateLineOfSight(game);
+      drawShadows(ctx, game, rayEndpoints);
 
       // Draw trail
       game.trail.forEach((point) => {

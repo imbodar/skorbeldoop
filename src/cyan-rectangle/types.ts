@@ -38,6 +38,11 @@ export interface VoronoiRegion {
   isRock: boolean;
 }
 
+export interface Point {
+  x: number;
+  y: number;
+}
+
 export interface GameState {
   player: Player;
   world: World;
@@ -46,4 +51,5 @@ export interface GameState {
   trail: TrailPoint[];
   rocks: Rock[];
   regions: VoronoiRegion[];
+  previousRayEndpoints: Point[];
 }
