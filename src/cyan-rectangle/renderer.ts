@@ -41,26 +41,36 @@ export function renderGame(ctx: CanvasRenderingContext2D, game: GameState): void
   ctx.lineWidth = 4;
   ctx.strokeRect(0, 0, game.world.width, game.world.height);
 
-  // Draw trail
-  ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)';
-  ctx.lineWidth = 3;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  ctx.beginPath();
-  let firstPoint = true;
-  for (let i = 0; i < GAME_CONSTANTS.PLAYER_TRAIL_LENGTH; i++) {
+  // Draw after-image trail
+  for (let i = 0; i < GAME_CONSTANTS.PLAYER_TRAIL_LENGTH; i += 2) {
     const idx = (player.trailIndex + i) % GAME_CONSTANTS.PLAYER_TRAIL_LENGTH;
     const point = player.trail[idx];
+
     if (point.x !== 0 || point.y !== 0) {
-      if (firstPoint) {
-        ctx.moveTo(point.x, point.y);
-        firstPoint = false;
-      } else {
-        ctx.lineTo(point.x, point.y);
-      }
+      const age = i / GAME_CONSTANTS.PLAYER_TRAIL_LENGTH;
+      const alpha = age * 0.5;
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(point.x, point.y);
+      ctx.rotate(player.rotation);
+
+      // Draw semi-transparent rectangle
+      ctx.fillStyle = '#00ffff';
+      ctx.fillRect(-player.width / 2, -player.height / 2, player.width, player.height);
+
+      // Draw border
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-player.width / 2, -player.height / 2, player.width, player.height);
+
+      // Draw direction indicator
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-player.width / 4, -player.height / 2 - 5, player.width / 2, 5);
+
+      ctx.restore();
     }
   }
-  ctx.stroke();
 
   // Draw cyan rectangle (player)
   ctx.save();
