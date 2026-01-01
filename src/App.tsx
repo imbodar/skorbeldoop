@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { CaveExplorer } from './cave-explorer';
+import { CyanRectangle } from './cyan-rectangle';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'game'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'cave-explorer' | 'cyan-rectangle'>('home');
 
-  if (currentPage === 'game') {
+  if (currentPage === 'cave-explorer') {
     return <CaveExplorer />;
+  }
+
+  if (currentPage === 'cyan-rectangle') {
+    return <CyanRectangle />;
   }
 
   return (
@@ -73,7 +78,7 @@ export default function App() {
             <strong>Can you survive the depths?</strong>
           </p>
           <button
-            onClick={() => setCurrentPage('game')}
+            onClick={() => setCurrentPage('cave-explorer')}
             style={{
               padding: '15px 40px',
               fontSize: '18px',
@@ -97,6 +102,57 @@ export default function App() {
             }}
           >
             Play Cave Explorer
+          </button>
+        </div>
+
+        <div style={{
+          background: '#f8f9fa',
+          borderRadius: '12px',
+          padding: '30px',
+          marginBottom: '30px'
+        }}>
+          <h2 style={{
+            fontSize: '28px',
+            marginBottom: '15px',
+            color: '#333'
+          }}>
+            🟦 Cyan Rectangle
+          </h2>
+          <p style={{
+            fontSize: '16px',
+            color: '#666',
+            marginBottom: '20px',
+            lineHeight: '1.6'
+          }}>
+            Control a cyan rectangle in an open world!<br />
+            Move around and explore the vast 5000x5000 map.<br />
+            <strong>Simple and clean.</strong>
+          </p>
+          <button
+            onClick={() => setCurrentPage('cyan-rectangle')}
+            style={{
+              padding: '15px 40px',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              background: 'linear-gradient(135deg, #00ffff, #00cccc)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(0, 255, 255, 0.4)',
+              transition: 'all 0.3s',
+              fontFamily: 'inherit'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 255, 255, 0.6)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 255, 255, 0.4)';
+            }}
+          >
+            Play Cyan Rectangle
           </button>
         </div>
 
