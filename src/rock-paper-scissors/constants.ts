@@ -22,3 +22,9 @@ export const CHOICE_HP = {
   paper: 70,
   scissors: 50,
 } as const;
+
+export const CHOICE_SPEED = {
+  rock: 10,
+  paper: 30,
+  scissors: 20,
+} as const;
