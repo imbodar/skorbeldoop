@@ -36,7 +36,8 @@ export function spawnSwarmer(
           vx: (Math.random() - 0.5) * 1,
           vy: (Math.random() - 0.5) * 1,
           rotation: Math.random() * Math.PI * 2,
-          trail: []
+          trail: [],
+          lastShootTime: 0
         };
       }
     }

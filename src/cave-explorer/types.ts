@@ -86,6 +86,15 @@ export interface Swarmer {
   vy: number;
   rotation: number;
   trail: Array<{ x: number; y: number }>;
+  lastShootTime: number;
+}
+
+export interface Projectile {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
 }
 
 export interface World {
@@ -109,8 +118,10 @@ export interface GameState {
   boids: Boid[];
   leviathans: Leviathan[];
   swarmers: Swarmer[];
+  projectiles: Projectile[];
   foodOrbs: FoodOrb[];
   shellFragments: ShellFragment[];
+  frameCount: number;
 }
 
 export interface Point {

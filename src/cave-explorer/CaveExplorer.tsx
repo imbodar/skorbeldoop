@@ -37,8 +37,10 @@ export default function CaveExplorer() {
       boids: [],
       leviathans: [],
       swarmers: [],
+      projectiles: [],
       foodOrbs: [],
-      shellFragments: []
+      shellFragments: [],
+      frameCount: 0
     };
 
     // Store game reference

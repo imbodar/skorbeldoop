@@ -1,11 +1,13 @@
-import { Swarmer, Rock, Point } from './types';
+import { Swarmer, Rock, Point, Projectile } from './types';
 import { GAME_CONSTANTS } from './constants';
 import { checkRockCollision } from './physics';
 
 export function updateSwarmers(
   swarmers: Swarmer[],
   playerPos: Point,
-  rocks: Rock[]
+  rocks: Rock[],
+  projectiles: Projectile[],
+  frameCount: number
 ): void {
   swarmers.forEach(swarmer => {
     const distToPlayer = Math.sqrt(
@@ -17,6 +19,29 @@ export function updateSwarmers(
       swarmer.x += swarmer.vx * 0.3;
       swarmer.y += swarmer.vy * 0.3;
       return;
+    }
+
+    // Shoot projectiles at player (with max count check for performance)
+    const timeSinceLastShot = frameCount - swarmer.lastShootTime;
+    if (timeSinceLastShot >= GAME_CONSTANTS.PROJECTILE_SHOOT_INTERVAL &&
+        projectiles.length < GAME_CONSTANTS.PROJECTILE_MAX_COUNT) {
+      // Calculate direction to player
+      const dx = playerPos.x - swarmer.x;
+      const dy = playerPos.y - swarmer.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist > 0) {
+        // Create projectile
+        const projectile: Projectile = {
+          x: swarmer.x,
+          y: swarmer.y,
+          vx: (dx / dist) * GAME_CONSTANTS.PROJECTILE_SPEED,
+          vy: (dy / dist) * GAME_CONSTANTS.PROJECTILE_SPEED,
+          radius: GAME_CONSTANTS.PROJECTILE_RADIUS
+        };
+        projectiles.push(projectile);
+        swarmer.lastShootTime = frameCount;
+      }
     }
 
     // Gentle attraction to player
@@ -34,16 +59,27 @@ export function updateSwarmers(
     swarmer.vx += (Math.random() - 0.5) * 0.1;
     swarmer.vy += (Math.random() - 0.5) * 0.1;
 
-    // Wall avoidance
+    // Optimized wall avoidance - only check nearby rocks
     let wallAvoidX = 0;
     let wallAvoidY = 0;
     const wallAvoidanceRadius = 100;
+    const maxCheckRadius = 200; // Pre-filter rocks by distance
+    let rocksChecked = 0;
+    const maxRocksToCheck = 10; // Limit number of rocks to check
 
     for (const rock of rocks) {
+      // Quick distance check without sqrt
       const rockDx = swarmer.x - rock.x;
       const rockDy = swarmer.y - rock.y;
-      const rockDist = Math.sqrt(rockDx * rockDx + rockDy * rockDy);
+      const distSq = rockDx * rockDx + rockDy * rockDy;
 
+      // Skip if too far
+      if (distSq > maxCheckRadius * maxCheckRadius) continue;
+
+      // Limit number of rocks checked for performance
+      if (++rocksChecked > maxRocksToCheck) break;
+
+      const rockDist = Math.sqrt(distSq);
       if (rockDist < wallAvoidanceRadius + rock.width / 2) {
         const effectiveDist = rockDist - rock.width / 2;
         if (effectiveDist < wallAvoidanceRadius && effectiveDist > 0) {
