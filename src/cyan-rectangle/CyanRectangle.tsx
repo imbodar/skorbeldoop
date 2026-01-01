@@ -211,6 +211,11 @@ export default function CyanRectangle() {
       ctx.closePath();
       ctx.fill();
 
+      // Add black outline
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
       ctx.restore();
 
       // Restore context
