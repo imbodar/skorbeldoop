@@ -41,30 +41,38 @@ export function renderGame(ctx: CanvasRenderingContext2D, game: GameState): void
   ctx.lineWidth = 4;
   ctx.strokeRect(0, 0, game.world.width, game.world.height);
 
-  // Draw trail
-  ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)';
-  ctx.lineWidth = 3;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  ctx.beginPath();
-  let firstPoint = true;
-  for (let i = 0; i < GAME_CONSTANTS.PLAYER_TRAIL_LENGTH; i++) {
-    const idx = (player.trailIndex + i) % GAME_CONSTANTS.PLAYER_TRAIL_LENGTH;
-    const point = player.trail[idx];
-    if (point.x !== 0 || point.y !== 0) {
-      if (firstPoint) {
-        ctx.moveTo(point.x, point.y);
-        firstPoint = false;
-      } else {
-        ctx.lineTo(point.x, point.y);
-      }
+  // Draw fancy glowy trail
+  if (player.trail && player.trail.length > 0) {
+    for (let i = 0; i < player.trail.length; i++) {
+      const trailPos = player.trail[i];
+      if (trailPos.x === 0 && trailPos.y === 0) continue;
+
+      const age = i / player.trail.length;
+      const alpha = age * age * 0.5;
+      const size = 5 + age * 25;
+
+      // Glowy trail effect
+      ctx.fillStyle = `rgba(0, 255, 255, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(trailPos.x, trailPos.y, size, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
-  ctx.stroke();
 
   // Draw cyan rectangle (player)
   ctx.save();
   ctx.translate(player.x, player.y);
+
+  // Body glow effect
+  const playerGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, 60);
+  playerGlow.addColorStop(0, 'rgba(0, 255, 255, 0.6)');
+  playerGlow.addColorStop(0.5, 'rgba(0, 255, 255, 0.3)');
+  playerGlow.addColorStop(1, 'rgba(0, 255, 255, 0)');
+  ctx.fillStyle = playerGlow;
+  ctx.beginPath();
+  ctx.arc(0, 0, 60, 0, Math.PI * 2);
+  ctx.fill();
+
   ctx.rotate(player.rotation);
 
   // Main rectangle body
