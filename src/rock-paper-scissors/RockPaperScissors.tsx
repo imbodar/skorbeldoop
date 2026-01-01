@@ -13,8 +13,6 @@ const RockPaperScissors = () => {
     showResult: false,
   });
 
-  const [player1Highlight, setPlayer1Highlight] = useState<Choice>(null);
-  const [player2Highlight, setPlayer2Highlight] = useState<Choice>(null);
 
   const determineWinner = (p1: Choice, p2: Choice): GameResult => {
     if (!p1 || !p2) return null;
@@ -72,25 +70,19 @@ const RockPaperScissors = () => {
 
       // Player 1 controls: W, A, S
       if (key === 'w') {
-        setPlayer1Highlight('rock');
         handleChoice('player1', 'rock');
       } else if (key === 'a') {
-        setPlayer1Highlight('paper');
         handleChoice('player1', 'paper');
       } else if (key === 's') {
-        setPlayer1Highlight('scissors');
         handleChoice('player1', 'scissors');
       }
 
       // Player 2 controls: Arrow keys
       if (key === 'arrowup') {
-        setPlayer2Highlight('rock');
         handleChoice('player2', 'rock');
       } else if (key === 'arrowleft') {
-        setPlayer2Highlight('paper');
         handleChoice('player2', 'paper');
       } else if (key === 'arrowdown') {
-        setPlayer2Highlight('scissors');
         handleChoice('player2', 'scissors');
       }
 
@@ -101,23 +93,10 @@ const RockPaperScissors = () => {
       }
     };
 
-    const handleKeyUp = (e: KeyboardEvent) => {
-      const key = e.key.toLowerCase();
-
-      if (['w', 'a', 's'].includes(key)) {
-        setPlayer1Highlight(null);
-      }
-      if (['arrowup', 'arrowleft', 'arrowdown'].includes(key)) {
-        setPlayer2Highlight(null);
-      }
-    };
-
     window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
     };
   }, [handleChoice, gameState.showResult, resetRound]);
 
@@ -222,7 +201,6 @@ const RockPaperScissors = () => {
             {(['rock', 'paper', 'scissors'] as const).map((choice, index) => {
               const keys = ['W', 'A', 'S'];
               const isSelected = gameState.player1Choice === choice;
-              const isHighlighted = player1Highlight === choice;
               const hasChosen = gameState.player1Choice !== null;
               const showingResult = gameState.showResult;
 
@@ -238,9 +216,8 @@ const RockPaperScissors = () => {
                     borderRadius: '10px',
                     textAlign: 'center',
                     fontSize: '48px',
-                    backgroundColor: isHighlighted ? '#e6f3ff' : (hideChoice ? '#ffffcc' : (showingResult && isSelected ? '#ffffcc' : '#fff')),
-                    transform: isHighlighted ? 'scale(1.05)' : 'scale(1)',
-                    transition: 'all 0.1s ease',
+                    backgroundColor: hideChoice ? '#ffffcc' : (showingResult && isSelected ? '#ffffcc' : '#fff'),
+                    transition: 'background-color 0.1s ease',
                     boxShadow: (showingResult && isSelected) ? '0 4px 8px rgba(255, 215, 0, 0.5)' : 'none',
                   }}
                 >
@@ -324,7 +301,6 @@ const RockPaperScissors = () => {
             {(['rock', 'paper', 'scissors'] as const).map((choice, index) => {
               const keys = ['↑', '←', '↓'];
               const isSelected = gameState.player2Choice === choice;
-              const isHighlighted = player2Highlight === choice;
               const hasChosen = gameState.player2Choice !== null;
               const showingResult = gameState.showResult;
 
@@ -340,9 +316,8 @@ const RockPaperScissors = () => {
                     borderRadius: '10px',
                     textAlign: 'center',
                     fontSize: '48px',
-                    backgroundColor: isHighlighted ? '#ffe6f0' : (hideChoice ? '#ffffcc' : (showingResult && isSelected ? '#ffffcc' : '#fff')),
-                    transform: isHighlighted ? 'scale(1.05)' : 'scale(1)',
-                    transition: 'all 0.1s ease',
+                    backgroundColor: hideChoice ? '#ffffcc' : (showingResult && isSelected ? '#ffffcc' : '#fff'),
+                    transition: 'background-color 0.1s ease',
                     boxShadow: (showingResult && isSelected) ? '0 4px 8px rgba(255, 215, 0, 0.5)' : 'none',
                   }}
                 >
