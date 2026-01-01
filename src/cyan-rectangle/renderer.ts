@@ -55,20 +55,18 @@ export function renderGame(ctx: CanvasRenderingContext2D, game: GameState): void
       ctx.translate(point.x, point.y);
       ctx.rotate(point.rotation);
 
+      // Add glow effect
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#00ffff';
+
       // Draw semi-transparent rounded rectangle
       ctx.fillStyle = '#00ffff';
       ctx.beginPath();
       ctx.roundRect(-player.width / 2, -player.height / 2, player.width, player.height, 8);
       ctx.fill();
 
-      // Draw border
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.roundRect(-player.width / 2, -player.height / 2, player.width, player.height, 8);
-      ctx.stroke();
-
       // Draw direction indicator
+      ctx.shadowBlur = 0;
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(-player.width / 4, -player.height / 2 - 5, player.width / 2, 5);
 
@@ -80,6 +78,10 @@ export function renderGame(ctx: CanvasRenderingContext2D, game: GameState): void
   ctx.save();
   ctx.translate(player.x, player.y);
   ctx.rotate(player.rotation);
+
+  // Add glow effect
+  ctx.shadowBlur = 30;
+  ctx.shadowColor = '#00ffff';
 
   // Main rectangle body with rounded corners
   ctx.fillStyle = '#00ffff';
@@ -95,6 +97,7 @@ export function renderGame(ctx: CanvasRenderingContext2D, game: GameState): void
   ctx.stroke();
 
   // Direction indicator (front edge)
+  ctx.shadowBlur = 0;
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(-player.width / 4, -player.height / 2 - 5, player.width / 2, 5);
 
