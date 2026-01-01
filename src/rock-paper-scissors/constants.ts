@@ -16,3 +16,9 @@ export const PLAYER_COLORS = {
   player1: '#4A90E2',
   player2: '#E24A90',
 } as const;
+
+export const CHOICE_HP = {
+  rock: 100,
+  paper: 70,
+  scissors: 50,
+} as const;

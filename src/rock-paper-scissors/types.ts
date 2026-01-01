@@ -13,4 +13,6 @@ export interface GameState {
   roundNumber: number;
   showResult: boolean;
   phase: GamePhase;
+  player1HP: number;
+  player2HP: number;
 }

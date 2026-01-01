@@ -1,6 +1,42 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GameState, Choice, GameResult } from './types';
-import { CHOICE_EMOJI, PLAYER_COLORS } from './constants';
+import { CHOICE_EMOJI, PLAYER_COLORS, CHOICE_HP } from './constants';
+
+// Health Bar Component
+const HealthBar = ({ currentHP, maxHP, color }: { currentHP: number; maxHP: number; color: string }) => {
+  const percentage = Math.max(0, Math.min(100, (currentHP / maxHP) * 100));
+
+  return (
+    <div style={{
+      marginTop: '10px',
+      width: '100%',
+    }}>
+      <div style={{
+        fontSize: '12px',
+        fontWeight: 'bold',
+        marginBottom: '4px',
+        textAlign: 'center',
+      }}>
+        {currentHP} / {maxHP} HP
+      </div>
+      <div style={{
+        width: '100%',
+        height: '20px',
+        backgroundColor: '#ddd',
+        borderRadius: '10px',
+        overflow: 'hidden',
+        border: '2px solid #333',
+      }}>
+        <div style={{
+          width: `${percentage}%`,
+          height: '100%',
+          backgroundColor: color,
+          transition: 'width 0.3s ease',
+        }} />
+      </div>
+    </div>
+  );
+};
 
 const RockPaperScissors = () => {
   const [gameState, setGameState] = useState<GameState>({
@@ -12,6 +48,8 @@ const RockPaperScissors = () => {
     roundNumber: 1,
     showResult: false,
     phase: 'selection',
+    player1HP: 0,
+    player2HP: 0,
   });
 
 
@@ -37,6 +75,8 @@ const RockPaperScissors = () => {
       result: null,
       showResult: false,
       phase: 'selection',
+      player1HP: 0,
+      player2HP: 0,
     }));
   }, []);
 
@@ -54,6 +94,8 @@ const RockPaperScissors = () => {
         return {
           ...newState,
           phase: 'arena' as const,
+          player1HP: CHOICE_HP[newState.player1Choice],
+          player2HP: CHOICE_HP[newState.player2Choice],
         };
       }
 
@@ -347,27 +389,57 @@ const RockPaperScissors = () => {
         }}>
           <div style={{
             textAlign: 'center',
+            width: '200px',
           }}>
             <div>{CHOICE_EMOJI[gameState.player1Choice!]}</div>
             <div style={{
               fontSize: '14px',
               color: PLAYER_COLORS.player1,
               marginTop: '10px',
+              fontWeight: 'bold',
             }}>
               Player 1
             </div>
+            <div style={{
+              fontSize: '12px',
+              color: '#666',
+              marginTop: '5px',
+              textTransform: 'capitalize',
+            }}>
+              {gameState.player1Choice}
+            </div>
+            <HealthBar
+              currentHP={gameState.player1HP}
+              maxHP={CHOICE_HP[gameState.player1Choice!]}
+              color={PLAYER_COLORS.player1}
+            />
           </div>
           <div style={{
             textAlign: 'center',
+            width: '200px',
           }}>
             <div>{CHOICE_EMOJI[gameState.player2Choice!]}</div>
             <div style={{
               fontSize: '14px',
               color: PLAYER_COLORS.player2,
               marginTop: '10px',
+              fontWeight: 'bold',
             }}>
               Player 2
             </div>
+            <div style={{
+              fontSize: '12px',
+              color: '#666',
+              marginTop: '5px',
+              textTransform: 'capitalize',
+            }}>
+              {gameState.player2Choice}
+            </div>
+            <HealthBar
+              currentHP={gameState.player2HP}
+              maxHP={CHOICE_HP[gameState.player2Choice!]}
+              color={PLAYER_COLORS.player2}
+            />
           </div>
         </div>
       </div>
