@@ -110,7 +110,7 @@ export default function CyanRectangle() {
       game.camera.y += (game.player.y - game.camera.y) * GAME_CONSTANTS.CAMERA_FOLLOW_SPEED;
 
       // Render
-      ctx.fillStyle = '#000000';
+      ctx.fillStyle = '#0a0a18';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Save context for camera transformation
@@ -211,8 +211,8 @@ export default function CyanRectangle() {
       ctx.closePath();
       ctx.fill();
 
-      // Add black outline
-      ctx.strokeStyle = '#000000';
+      // Add dark blue outline
+      ctx.strokeStyle = '#001540';
       ctx.lineWidth = 2;
       ctx.stroke();
 
