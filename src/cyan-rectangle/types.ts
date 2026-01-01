@@ -1,8 +1,8 @@
 export interface Player {
   x: number;
   y: number;
-  vx: number;
-  vy: number;
+  rotation: number;
+  speed: number;
   width: number;
   height: number;
 }
