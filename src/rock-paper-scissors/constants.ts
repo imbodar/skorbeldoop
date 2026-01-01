@@ -16,3 +16,15 @@ export const PLAYER_COLORS = {
   player1: '#4A90E2',
   player2: '#E24A90',
 } as const;
+
+// Arena configuration
+export const ARENA_WIDTH = 800;
+export const ARENA_HEIGHT = 500;
+export const PLAYER_SIZE = 60;
+
+// Initial spawn positions (20% from edges)
+export const PLAYER1_SPAWN_X = ARENA_WIDTH * 0.2;
+export const PLAYER1_SPAWN_Y = ARENA_HEIGHT / 2;
+
+export const PLAYER2_SPAWN_X = ARENA_WIDTH * 0.8;
+export const PLAYER2_SPAWN_Y = ARENA_HEIGHT / 2;

@@ -1,6 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GameState, Choice, GameResult } from './types';
-import { CHOICE_EMOJI, PLAYER_COLORS } from './constants';
+import {
+  CHOICE_EMOJI,
+  PLAYER_COLORS,
+  ARENA_WIDTH,
+  ARENA_HEIGHT,
+  PLAYER_SIZE,
+  PLAYER1_SPAWN_X,
+  PLAYER1_SPAWN_Y,
+  PLAYER2_SPAWN_X,
+  PLAYER2_SPAWN_Y
+} from './constants';
 
 const RockPaperScissors = () => {
   const [gameState, setGameState] = useState<GameState>({
@@ -12,6 +22,8 @@ const RockPaperScissors = () => {
     roundNumber: 1,
     showResult: false,
     phase: 'selection',
+    player1Entity: null,
+    player2Entity: null,
   });
 
 
@@ -37,6 +49,8 @@ const RockPaperScissors = () => {
       result: null,
       showResult: false,
       phase: 'selection',
+      player1Entity: null,
+      player2Entity: null,
     }));
   }, []);
 
@@ -54,6 +68,14 @@ const RockPaperScissors = () => {
         return {
           ...newState,
           phase: 'arena' as const,
+          player1Entity: {
+            position: { x: PLAYER1_SPAWN_X, y: PLAYER1_SPAWN_Y },
+            choice: newState.player1Choice,
+          },
+          player2Entity: {
+            position: { x: PLAYER2_SPAWN_X, y: PLAYER2_SPAWN_Y },
+            choice: newState.player2Choice,
+          },
         };
       }
 
@@ -313,94 +335,140 @@ const RockPaperScissors = () => {
     </>
   );
 
-  const renderArenaPhase = () => (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '30px',
-      marginTop: '30px',
-    }}>
-      <div style={{
-        fontSize: '32px',
-        fontWeight: 'bold',
-        color: '#333',
-      }}>
-        ARENA MODE
-      </div>
+  const renderArenaPhase = () => {
+    if (!gameState.player1Entity || !gameState.player2Entity) return null;
 
+    return (
       <div style={{
-        width: '100%',
-        height: '400px',
-        border: '4px solid #333',
-        borderRadius: '15px',
-        backgroundColor: '#f5f5f5',
-        position: 'relative',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
+        gap: '30px',
+        marginTop: '30px',
       }}>
         <div style={{
-          display: 'flex',
-          gap: '100px',
-          fontSize: '64px',
+          fontSize: '32px',
+          fontWeight: 'bold',
+          color: '#333',
         }}>
+          BATTLE ARENA
+        </div>
+
+        {/* The Arena Battlefield */}
+        <div style={{
+          width: `${ARENA_WIDTH}px`,
+          height: `${ARENA_HEIGHT}px`,
+          border: '4px solid #333',
+          borderRadius: '15px',
+          backgroundColor: '#e8f4f8',
+          backgroundImage: 'linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent)',
+          backgroundSize: '50px 50px',
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          {/* Center line */}
           <div style={{
-            textAlign: 'center',
+            position: 'absolute',
+            left: '50%',
+            top: 0,
+            bottom: 0,
+            width: '2px',
+            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            transform: 'translateX(-50%)',
+          }} />
+
+          {/* Player 1 Entity */}
+          <div style={{
+            position: 'absolute',
+            left: `${gameState.player1Entity.position.x}px`,
+            top: `${gameState.player1Entity.position.y}px`,
+            transform: 'translate(-50%, -50%)',
+            fontSize: `${PLAYER_SIZE}px`,
+            lineHeight: '1',
+            textShadow: `0 0 10px ${PLAYER_COLORS.player1}`,
+            transition: 'all 0.05s linear',
           }}>
-            <div>{CHOICE_EMOJI[gameState.player1Choice!]}</div>
-            <div style={{
-              fontSize: '14px',
-              color: PLAYER_COLORS.player1,
-              marginTop: '10px',
-            }}>
-              Player 1
-            </div>
+            {CHOICE_EMOJI[gameState.player1Entity.choice]}
           </div>
+
+          {/* Player 1 Label */}
           <div style={{
-            textAlign: 'center',
+            position: 'absolute',
+            left: `${gameState.player1Entity.position.x}px`,
+            top: `${gameState.player1Entity.position.y + PLAYER_SIZE / 2 + 10}px`,
+            transform: 'translate(-50%, 0)',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            color: PLAYER_COLORS.player1,
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            padding: '2px 6px',
+            borderRadius: '4px',
+            whiteSpace: 'nowrap',
           }}>
-            <div>{CHOICE_EMOJI[gameState.player2Choice!]}</div>
-            <div style={{
-              fontSize: '14px',
-              color: PLAYER_COLORS.player2,
-              marginTop: '10px',
-            }}>
-              Player 2
-            </div>
+            P1
+          </div>
+
+          {/* Player 2 Entity */}
+          <div style={{
+            position: 'absolute',
+            left: `${gameState.player2Entity.position.x}px`,
+            top: `${gameState.player2Entity.position.y}px`,
+            transform: 'translate(-50%, -50%)',
+            fontSize: `${PLAYER_SIZE}px`,
+            lineHeight: '1',
+            textShadow: `0 0 10px ${PLAYER_COLORS.player2}`,
+            transition: 'all 0.05s linear',
+          }}>
+            {CHOICE_EMOJI[gameState.player2Entity.choice]}
+          </div>
+
+          {/* Player 2 Label */}
+          <div style={{
+            position: 'absolute',
+            left: `${gameState.player2Entity.position.x}px`,
+            top: `${gameState.player2Entity.position.y + PLAYER_SIZE / 2 + 10}px`,
+            transform: 'translate(-50%, 0)',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            color: PLAYER_COLORS.player2,
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            padding: '2px 6px',
+            borderRadius: '4px',
+            whiteSpace: 'nowrap',
+          }}>
+            P2
           </div>
         </div>
-      </div>
 
-      <div style={{
-        textAlign: 'center',
-        color: '#666',
-        fontSize: '14px',
-      }}>
-        <p>Arena phase coming soon!</p>
-        <p>Movement controls will be added in the next phase.</p>
-      </div>
+        <div style={{
+          textAlign: 'center',
+          color: '#666',
+          fontSize: '14px',
+        }}>
+          <p>Arena ready! Movement controls coming in next phase.</p>
+        </div>
 
-      {/* Temporary: Auto-transition to results for testing */}
-      <button
-        onClick={() => {
-          const winner = determineWinner(gameState.player1Choice, gameState.player2Choice);
-          endArena(winner);
-        }}
-        style={{
-          padding: '15px 30px',
-          fontSize: '18px',
-          backgroundColor: '#4A90E2',
-          color: 'white',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: 'pointer',
-        }}
-      >
-        Simulate Battle (Temporary)
-      </button>
-    </div>
-  );
+        {/* Temporary: Auto-transition to results for testing */}
+        <button
+          onClick={() => {
+            const winner = determineWinner(gameState.player1Choice, gameState.player2Choice);
+            endArena(winner);
+          }}
+          style={{
+            padding: '15px 30px',
+            fontSize: '18px',
+            backgroundColor: '#4A90E2',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+          }}
+        >
+          Simulate Battle (Temporary)
+        </button>
+      </div>
+    );
+  };
 
   const renderResultsPhase = () => (
     <>
