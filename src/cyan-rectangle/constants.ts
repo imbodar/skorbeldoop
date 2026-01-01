@@ -18,6 +18,6 @@ export const GAME_CONSTANTS = {
   CAMERA_FOLLOW_SPEED: 0.1,
 
   // Trail effect
-  MAX_TRAIL_LENGTH: 150,
+  MAX_TRAIL_LENGTH: 50,
   TRAIL_MIN_SPEED: 0.1,
 };
