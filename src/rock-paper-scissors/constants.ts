@@ -1,9 +1,9 @@
 export const CHOICES = ['rock', 'paper', 'scissors'] as const;
 
 export const CHOICE_COLORS = {
-  rock: '#8B4513',
+  rock: '#000000',
   paper: '#FFFFFF',
-  scissors: '#C0C0C0',
+  scissors: '#888888',
 } as const;
 
 export const CHOICE_EMOJI = {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { GameState, Choice, GameResult } from './types';
 import {
-  CHOICE_EMOJI,
+  CHOICE_COLORS,
   PLAYER_COLORS,
   ARENA_WIDTH,
   ARENA_HEIGHT,
@@ -317,10 +317,19 @@ const RockPaperScissors = () => {
                     backgroundColor: hasChosen ? '#ffffcc' : '#fff',
                     transition: 'background-color 0.1s ease',
                     boxShadow: isSelected ? '0 4px 8px rgba(255, 215, 0, 0.5)' : 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
                   }}
                 >
-                  <div>{CHOICE_EMOJI[choice]}</div>
-                  <div style={{ fontSize: '18px', marginTop: '10px', textTransform: 'capitalize' }}>
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    backgroundColor: CHOICE_COLORS[choice],
+                    border: choice === 'paper' ? '2px solid #ccc' : 'none',
+                  }} />
+                  <div style={{ fontSize: '18px', marginTop: '15px', textTransform: 'capitalize' }}>
                     {choice}
                   </div>
                   <div style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
@@ -402,10 +411,19 @@ const RockPaperScissors = () => {
                     backgroundColor: hasChosen ? '#ffffcc' : '#fff',
                     transition: 'background-color 0.1s ease',
                     boxShadow: isSelected ? '0 4px 8px rgba(255, 215, 0, 0.5)' : 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
                   }}
                 >
-                  <div>{CHOICE_EMOJI[choice]}</div>
-                  <div style={{ fontSize: '18px', marginTop: '10px', textTransform: 'capitalize' }}>
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    backgroundColor: CHOICE_COLORS[choice],
+                    border: choice === 'paper' ? '2px solid #ccc' : 'none',
+                  }} />
+                  <div style={{ fontSize: '18px', marginTop: '15px', textTransform: 'capitalize' }}>
                     {choice}
                   </div>
                   <div style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
@@ -528,13 +546,14 @@ const RockPaperScissors = () => {
             left: `${gameState.player1Entity.position.x}px`,
             top: `${gameState.player1Entity.position.y}px`,
             transform: 'translate(-50%, -50%)',
-            fontSize: `${PLAYER_SIZE}px`,
-            lineHeight: '1',
-            textShadow: `0 0 10px ${PLAYER_COLORS.player1}`,
+            width: `${PLAYER_SIZE}px`,
+            height: `${PLAYER_SIZE}px`,
+            borderRadius: '50%',
+            backgroundColor: CHOICE_COLORS[gameState.player1Entity.choice],
+            border: gameState.player1Entity.choice === 'paper' ? '3px solid #ccc' : 'none',
+            boxShadow: `0 0 20px ${PLAYER_COLORS.player1}`,
             transition: 'all 0.05s linear',
-          }}>
-            {CHOICE_EMOJI[gameState.player1Entity.choice]}
-          </div>
+          }} />
 
           {/* Player 1 Label */}
           <div style={{
@@ -559,13 +578,14 @@ const RockPaperScissors = () => {
             left: `${gameState.player2Entity.position.x}px`,
             top: `${gameState.player2Entity.position.y}px`,
             transform: 'translate(-50%, -50%)',
-            fontSize: `${PLAYER_SIZE}px`,
-            lineHeight: '1',
-            textShadow: `0 0 10px ${PLAYER_COLORS.player2}`,
+            width: `${PLAYER_SIZE}px`,
+            height: `${PLAYER_SIZE}px`,
+            borderRadius: '50%',
+            backgroundColor: CHOICE_COLORS[gameState.player2Entity.choice],
+            border: gameState.player2Entity.choice === 'paper' ? '3px solid #ccc' : 'none',
+            boxShadow: `0 0 20px ${PLAYER_COLORS.player2}`,
             transition: 'all 0.05s linear',
-          }}>
-            {CHOICE_EMOJI[gameState.player2Entity.choice]}
-          </div>
+          }} />
 
           {/* Player 2 Label */}
           <div style={{
@@ -641,12 +661,21 @@ const RockPaperScissors = () => {
           border: `3px solid ${PLAYER_COLORS.player1}`,
           borderRadius: '10px',
           backgroundColor: '#f0f8ff',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
         }}>
-          <div style={{ fontSize: '64px' }}>{CHOICE_EMOJI[gameState.player1Choice!]}</div>
+          <div style={{
+            width: '80px',
+            height: '80px',
+            borderRadius: '50%',
+            backgroundColor: CHOICE_COLORS[gameState.player1Choice!],
+            border: gameState.player1Choice === 'paper' ? '3px solid #ccc' : 'none',
+          }} />
           <div style={{
             fontSize: '18px',
             color: PLAYER_COLORS.player1,
-            marginTop: '10px',
+            marginTop: '15px',
             fontWeight: 'bold',
           }}>
             Player 1
@@ -669,12 +698,21 @@ const RockPaperScissors = () => {
           border: `3px solid ${PLAYER_COLORS.player2}`,
           borderRadius: '10px',
           backgroundColor: '#fff0f5',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
         }}>
-          <div style={{ fontSize: '64px' }}>{CHOICE_EMOJI[gameState.player2Choice!]}</div>
+          <div style={{
+            width: '80px',
+            height: '80px',
+            borderRadius: '50%',
+            backgroundColor: CHOICE_COLORS[gameState.player2Choice!],
+            border: gameState.player2Choice === 'paper' ? '3px solid #ccc' : 'none',
+          }} />
           <div style={{
             fontSize: '18px',
             color: PLAYER_COLORS.player2,
-            marginTop: '10px',
+            marginTop: '15px',
             fontWeight: 'bold',
           }}>
             Player 2
