@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { GameState, Rock } from './types';
 import { GAME_CONSTANTS } from './constants';
 import { generateVoronoiWorld, findSafeSpawnPosition } from './worldGenerator';
+import { generateBoids } from './boidGenerator';
+import { updateBoids } from './boidBehavior';
 
 export default function CyanRectangle() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -17,6 +19,9 @@ export default function CyanRectangle() {
     // Generate voronoi world
     const { rocks, regions } = generateVoronoiWorld();
     const spawnPos = findSafeSpawnPosition(rocks);
+
+    // Generate boids
+    const boids = generateBoids(spawnPos.x, spawnPos.y, rocks);
 
     // Initialize game state
     const game: GameState = {
@@ -41,6 +46,7 @@ export default function CyanRectangle() {
       trail: [],
       rocks,
       regions,
+      boids,
     };
 
     gameRef.current = game;
@@ -165,6 +171,9 @@ export default function CyanRectangle() {
       game.camera.x += (game.player.x - game.camera.x) * GAME_CONSTANTS.CAMERA_FOLLOW_SPEED;
       game.camera.y += (game.player.y - game.camera.y) * GAME_CONSTANTS.CAMERA_FOLLOW_SPEED;
 
+      // Update boids
+      updateBoids(game.boids, game.player.x, game.player.y, game.rocks);
+
       // Render
       ctx.fillStyle = '#0a0a18';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -203,6 +212,53 @@ export default function CyanRectangle() {
       ctx.fillStyle = '#4a4a4a';
       game.rocks.forEach(rock => {
         ctx.fillRect(rock.x, rock.y, rock.width, rock.height);
+      });
+
+      // Draw boids
+      game.boids.forEach(boid => {
+        // Draw trail
+        if (boid.trail && boid.trail.length > 0) {
+          for (let i = 0; i < boid.trail.length; i++) {
+            const trailPos = boid.trail[i];
+            const age = i / boid.trail.length;
+            const alpha = age * age * 0.4;
+            const size = 2 + age * 6;
+
+            ctx.fillStyle = `rgba(255, 105, 180, ${alpha})`;
+            ctx.beginPath();
+            ctx.arc(trailPos.x, trailPos.y, size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        // Draw boid with glow
+        ctx.save();
+        ctx.translate(boid.x, boid.y);
+
+        // Radial gradient glow
+        const boidGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 30);
+        boidGradient.addColorStop(0, 'rgba(255, 105, 180, 0.4)');
+        boidGradient.addColorStop(0.5, 'rgba(255, 105, 180, 0.2)');
+        boidGradient.addColorStop(1, 'rgba(255, 105, 180, 0)');
+        ctx.fillStyle = boidGradient;
+        ctx.beginPath();
+        ctx.arc(0, 0, 30, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw triangular body pointing in direction of movement
+        const angle = Math.atan2(boid.vy, boid.vx);
+        ctx.rotate(angle);
+
+        ctx.fillStyle = '#ff69b4';
+        ctx.beginPath();
+        const height = boid.size * Math.sqrt(3);
+        ctx.moveTo(height, 0);
+        ctx.lineTo(0, boid.size);
+        ctx.lineTo(0, -boid.size);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
       });
 
       // Draw trail
