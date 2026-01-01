@@ -419,6 +419,16 @@ const RockPaperScissors = () => {
     </>
   );
 
+  const getCircleColor = (choice: Choice): string => {
+    if (!choice) return '#fff';
+    switch (choice) {
+      case 'rock': return '#000';
+      case 'scissors': return '#808080';
+      case 'paper': return '#fff';
+      default: return '#fff';
+    }
+  };
+
   const renderArenaPhase = () => (
     <div style={{
       display: 'flex',
@@ -430,7 +440,7 @@ const RockPaperScissors = () => {
       <div style={{
         fontSize: '32px',
         fontWeight: 'bold',
-        color: '#333',
+        color: '#fff',
       }}>
         ARENA MODE
       </div>
@@ -440,27 +450,28 @@ const RockPaperScissors = () => {
         height: '400px',
         border: '4px solid #333',
         borderRadius: '15px',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#000',
         position: 'relative',
         overflow: 'hidden',
       }}>
-        {/* Player 1 Avatar */}
+        {/* Player 1 Health Bar - Top Left Corner */}
         <div style={{
           position: 'absolute',
-          left: `${gameState.player1Position.x}px`,
-          top: `${gameState.player1Position.y}px`,
-          transform: 'translate(-50%, -50%)',
-          textAlign: 'center',
-          width: '120px',
+          top: '10px',
+          left: '10px',
+          width: '200px',
+          padding: '10px',
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          borderRadius: '8px',
+          border: `2px solid ${PLAYER_COLORS.player1}`,
         }}>
-          <div style={{ fontSize: '64px' }}>{CHOICE_EMOJI[gameState.player1Choice!]}</div>
           <div style={{
-            fontSize: '12px',
+            fontSize: '14px',
             color: PLAYER_COLORS.player1,
-            marginTop: '5px',
             fontWeight: 'bold',
+            marginBottom: '5px',
           }}>
-            P1
+            Player 1
           </div>
           <HealthBar
             currentHP={gameState.player1HP}
@@ -468,12 +479,61 @@ const RockPaperScissors = () => {
             color={PLAYER_COLORS.player1}
           />
           <div style={{
-            fontSize: '10px',
-            color: '#666',
-            marginTop: '2px',
+            fontSize: '12px',
+            color: '#fff',
+            marginTop: '5px',
           }}>
             Speed: {CHOICE_SPEED[gameState.player1Choice!]}
           </div>
+        </div>
+
+        {/* Player 2 Health Bar - Top Right Corner */}
+        <div style={{
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+          width: '200px',
+          padding: '10px',
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          borderRadius: '8px',
+          border: `2px solid ${PLAYER_COLORS.player2}`,
+        }}>
+          <div style={{
+            fontSize: '14px',
+            color: PLAYER_COLORS.player2,
+            fontWeight: 'bold',
+            marginBottom: '5px',
+          }}>
+            Player 2
+          </div>
+          <HealthBar
+            currentHP={gameState.player2HP}
+            maxHP={CHOICE_HP[gameState.player2Choice!]}
+            color={PLAYER_COLORS.player2}
+          />
+          <div style={{
+            fontSize: '12px',
+            color: '#fff',
+            marginTop: '5px',
+          }}>
+            Speed: {CHOICE_SPEED[gameState.player2Choice!]}
+          </div>
+        </div>
+
+        {/* Player 1 Avatar */}
+        <div style={{
+          position: 'absolute',
+          left: `${gameState.player1Position.x}px`,
+          top: `${gameState.player1Position.y}px`,
+          transform: 'translate(-50%, -50%)',
+        }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            backgroundColor: getCircleColor(gameState.player1Choice),
+            border: '3px solid #fff',
+          }} />
         </div>
 
         {/* Player 2 Avatar */}
@@ -482,36 +542,20 @@ const RockPaperScissors = () => {
           left: `${gameState.player2Position.x}px`,
           top: `${gameState.player2Position.y}px`,
           transform: 'translate(-50%, -50%)',
-          textAlign: 'center',
-          width: '120px',
         }}>
-          <div style={{ fontSize: '64px' }}>{CHOICE_EMOJI[gameState.player2Choice!]}</div>
           <div style={{
-            fontSize: '12px',
-            color: PLAYER_COLORS.player2,
-            marginTop: '5px',
-            fontWeight: 'bold',
-          }}>
-            P2
-          </div>
-          <HealthBar
-            currentHP={gameState.player2HP}
-            maxHP={CHOICE_HP[gameState.player2Choice!]}
-            color={PLAYER_COLORS.player2}
-          />
-          <div style={{
-            fontSize: '10px',
-            color: '#666',
-            marginTop: '2px',
-          }}>
-            Speed: {CHOICE_SPEED[gameState.player2Choice!]}
-          </div>
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            backgroundColor: getCircleColor(gameState.player2Choice),
+            border: '3px solid #fff',
+          }} />
         </div>
       </div>
 
       <div style={{
         textAlign: 'center',
-        color: '#666',
+        color: '#fff',
         fontSize: '14px',
       }}>
         <p>Player 1: Use WASD to move | Player 2: Use Arrow Keys to move</p>
