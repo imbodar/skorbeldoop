@@ -10,7 +10,8 @@ import {
   PLAYER1_SPAWN_Y,
   PLAYER2_SPAWN_X,
   PLAYER2_SPAWN_Y,
-  MOVE_SPEED
+  MOVE_SPEED,
+  COLLISION_DISTANCE
 } from './constants';
 
 const RockPaperScissors = () => {
@@ -102,6 +103,14 @@ const RockPaperScissors = () => {
     });
   }, []);
 
+  // Check for collision between players
+  const checkCollision = useCallback((p1X: number, p1Y: number, p2X: number, p2Y: number): boolean => {
+    const dx = p1X - p2X;
+    const dy = p1Y - p2Y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    return distance < COLLISION_DISTANCE;
+  }, []);
+
   // Update player positions based on pressed keys
   const updatePositions = useCallback(() => {
     setGameState((prev) => {
@@ -133,6 +142,14 @@ const RockPaperScissors = () => {
       p2NewX = Math.max(halfSize, Math.min(ARENA_WIDTH - halfSize, p2NewX));
       p2NewY = Math.max(halfSize, Math.min(ARENA_HEIGHT - halfSize, p2NewY));
 
+      // Check for collision
+      if (checkCollision(p1NewX, p1NewY, p2NewX, p2NewY)) {
+        const winner = determineWinner(prev.player1Entity.choice, prev.player2Entity.choice);
+        // Trigger end arena in next frame to avoid state update during render
+        setTimeout(() => endArena(winner), 0);
+        return prev;
+      }
+
       // Only update if positions changed
       if (
         p1NewX !== prev.player1Entity.position.x ||
@@ -155,7 +172,7 @@ const RockPaperScissors = () => {
 
       return prev;
     });
-  }, []);
+  }, [checkCollision, determineWinner, endArena]);
 
   // Game loop for arena movement
   useEffect(() => {
@@ -430,6 +447,12 @@ const RockPaperScissors = () => {
   const renderArenaPhase = () => {
     if (!gameState.player1Entity || !gameState.player2Entity) return null;
 
+    // Calculate distance for visual feedback
+    const dx = gameState.player1Entity.position.x - gameState.player2Entity.position.x;
+    const dy = gameState.player1Entity.position.y - gameState.player2Entity.position.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const isNearCollision = distance < COLLISION_DISTANCE * 1.5;
+
     return (
       <div style={{
         display: 'flex',
@@ -468,6 +491,36 @@ const RockPaperScissors = () => {
             backgroundColor: 'rgba(0, 0, 0, 0.1)',
             transform: 'translateX(-50%)',
           }} />
+
+          {/* Collision warning circles */}
+          {isNearCollision && (
+            <>
+              <div style={{
+                position: 'absolute',
+                left: `${gameState.player1Entity.position.x}px`,
+                top: `${gameState.player1Entity.position.y}px`,
+                transform: 'translate(-50%, -50%)',
+                width: `${COLLISION_DISTANCE * 2}px`,
+                height: `${COLLISION_DISTANCE * 2}px`,
+                borderRadius: '50%',
+                border: `2px dashed ${PLAYER_COLORS.player1}`,
+                opacity: 0.3,
+                pointerEvents: 'none',
+              }} />
+              <div style={{
+                position: 'absolute',
+                left: `${gameState.player2Entity.position.x}px`,
+                top: `${gameState.player2Entity.position.y}px`,
+                transform: 'translate(-50%, -50%)',
+                width: `${COLLISION_DISTANCE * 2}px`,
+                height: `${COLLISION_DISTANCE * 2}px`,
+                borderRadius: '50%',
+                border: `2px dashed ${PLAYER_COLORS.player2}`,
+                opacity: 0.3,
+                pointerEvents: 'none',
+              }} />
+            </>
+          )}
 
           {/* Player 1 Entity */}
           <div style={{
@@ -539,30 +592,19 @@ const RockPaperScissors = () => {
         }}>
           <p><strong>Player 1 (Blue):</strong> WASD to move</p>
           <p><strong>Player 2 (Pink):</strong> Arrow keys to move</p>
-          <p style={{ marginTop: '10px', fontSize: '12px', color: '#999' }}>
-            Collide with opponent to battle!
+          <p style={{
+            marginTop: '10px',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            color: isNearCollision ? '#ff6b6b' : '#999',
+            transition: 'color 0.2s ease',
+          }}>
+            {isNearCollision ? '⚠️ Close! Get ready to battle!' : 'Chase your opponent to collide!'}
+          </p>
+          <p style={{ marginTop: '5px', fontSize: '12px', color: '#999' }}>
+            Distance for collision: {COLLISION_DISTANCE}px
           </p>
         </div>
-
-        {/* Temporary: Auto-transition to results for testing */}
-        <button
-          onClick={() => {
-            const winner = determineWinner(gameState.player1Choice, gameState.player2Choice);
-            endArena(winner);
-          }}
-          style={{
-            padding: '12px 24px',
-            fontSize: '14px',
-            backgroundColor: '#999',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            opacity: 0.7,
-          }}
-        >
-          Skip to Results (Dev)
-        </button>
       </div>
     );
   };
