@@ -7,6 +7,13 @@ export interface Player {
   height: number;
 }
 
+export interface TrailPoint {
+  x: number;
+  y: number;
+  rotation: number;
+  alpha: number;
+}
+
 export interface World {
   width: number;
   height: number;
@@ -23,4 +30,5 @@ export interface GameState {
   world: World;
   camera: Camera;
   keys: Record<string, boolean>;
+  trail: TrailPoint[];
 }
