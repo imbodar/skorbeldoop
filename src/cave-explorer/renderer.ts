@@ -43,8 +43,6 @@ export function renderGame(
   drawFoodOrbs(ctx, game, rayEndpoints);
   drawShellFragments(ctx, game, rayEndpoints);
   drawLeviathans(ctx, game, rayEndpoints);
-  drawSwarmers(ctx, game, rayEndpoints);
-  drawProjectiles(ctx, game);
   drawPlayer(ctx, game);
 
   ctx.restore();
@@ -540,88 +538,6 @@ function drawLeviathans(
 
       ctx.restore();
     }
-  });
-}
-
-function drawSwarmers(
-  ctx: CanvasRenderingContext2D,
-  game: GameState,
-  rayEndpoints: Point[]
-): void {
-  // Simplified rendering for performance
-  game.swarmers.forEach(swarmer => {
-    const dx = swarmer.x - game.player.x;
-    const dy = swarmer.y - game.player.y;
-    const distToSwarmer = Math.sqrt(dx * dx + dy * dy);
-
-    // Skip if too far from player
-    if (distToSwarmer > 1200) return;
-
-    // Draw simple trail (reduced complexity)
-    if (swarmer.trail && swarmer.trail.length > 0) {
-      // Only draw every other trail point
-      for (let i = 0; i < swarmer.trail.length; i += 2) {
-        const trailPos = swarmer.trail[i];
-        const age = i / swarmer.trail.length;
-        const alpha = age * age * 0.4;
-        const size = 8 + age * 12;
-
-        ctx.fillStyle = `rgba(0, 150, 200, ${alpha})`;
-        ctx.beginPath();
-        ctx.arc(trailPos.x, trailPos.y, size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    // Draw simple glow (no gradient)
-    ctx.fillStyle = 'rgba(0, 217, 255, 0.2)';
-    ctx.beginPath();
-    ctx.arc(swarmer.x, swarmer.y, 50, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Draw body as blue triangle
-    ctx.save();
-    ctx.translate(swarmer.x, swarmer.y);
-    ctx.rotate(swarmer.rotation);
-
-    const swarmerSize = swarmer.height / 2;
-    const swarmerHeight = swarmerSize * Math.sqrt(3);
-
-    ctx.fillStyle = '#00d9ff';
-    ctx.beginPath();
-    ctx.moveTo(swarmerHeight, 0);
-    ctx.lineTo(0, swarmerSize);
-    ctx.lineTo(0, -swarmerSize);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.restore();
-  });
-}
-
-function drawProjectiles(
-  ctx: CanvasRenderingContext2D,
-  game: GameState
-): void {
-  // Draw simple circles without expensive gradients
-  game.projectiles.forEach(projectile => {
-    // Outer glow (simple semi-transparent circle)
-    ctx.fillStyle = 'rgba(0, 217, 255, 0.3)';
-    ctx.beginPath();
-    ctx.arc(projectile.x, projectile.y, projectile.radius * 2, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Core projectile
-    ctx.fillStyle = '#00d9ff';
-    ctx.beginPath();
-    ctx.arc(projectile.x, projectile.y, projectile.radius, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Inner bright core
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(projectile.x, projectile.y, projectile.radius * 0.5, 0, Math.PI * 2);
-    ctx.fill();
   });
 }
 

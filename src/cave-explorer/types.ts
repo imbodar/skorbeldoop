@@ -80,27 +80,6 @@ export interface Leviathan {
   dashCount: number;
 }
 
-export interface Swarmer {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  vx: number;
-  vy: number;
-  rotation: number;
-  trail: Array<{ x: number; y: number }>;
-  trailIndex: number; // Circular buffer write index
-  lastShootTime: number;
-}
-
-export interface Projectile {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  radius: number;
-}
-
 export interface World {
   width: number;
   height: number;
@@ -121,8 +100,6 @@ export interface GameState {
   previousRayEndpoints: Array<{ x: number; y: number }>;
   boids: Boid[];
   leviathans: Leviathan[];
-  swarmers: Swarmer[];
-  projectiles: Projectile[];
   foodOrbs: FoodOrb[];
   shellFragments: ShellFragment[];
   frameCount: number;

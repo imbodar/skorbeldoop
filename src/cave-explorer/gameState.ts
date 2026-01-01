@@ -1,10 +1,9 @@
-import { GameState, Player, Boid, Leviathan, Point, FoodOrb, ShellFragment, Projectile } from './types';
+import { GameState, Player, Boid, Leviathan, Point, FoodOrb, ShellFragment } from './types';
 import { GAME_CONSTANTS } from './constants';
 import { checkRockCollision } from './physics';
 import { spawnBoid } from './boidGenerator';
 import { updateBoids } from './boidBehavior';
 import { updateLeviathans } from './leviathanBehavior';
-import { updateSwarmers } from './swarmerBehavior';
 
 export function initializePlayer(): Player {
   // Pre-allocate trail array for circular buffer (performance optimization)
@@ -360,61 +359,6 @@ export function checkShellFragmentCollisions(game: GameState): void {
   }
 }
 
-export function updateProjectiles(game: GameState): void {
-  for (let i = game.projectiles.length - 1; i >= 0; i--) {
-    const projectile = game.projectiles[i];
-
-    // Update position
-    projectile.x += projectile.vx;
-    projectile.y += projectile.vy;
-
-    // Remove if out of bounds or too far from player (optimization)
-    const dx = projectile.x - game.player.x;
-    const dy = projectile.y - game.player.y;
-    const distToPlayer = Math.sqrt(dx * dx + dy * dy);
-
-    if (projectile.x < 0 || projectile.x > game.world.width ||
-        projectile.y < 0 || projectile.y > game.world.height ||
-        distToPlayer > 2000) {
-      game.projectiles.splice(i, 1);
-    }
-  }
-}
-
-export function checkProjectileCollisions(game: GameState): void {
-  const player = game.player;
-
-  if (player.isDead || player.invincible) {
-    return;
-  }
-
-  const playerCollisionRadius = Math.max(player.width, player.height) / 2;
-
-  for (let i = game.projectiles.length - 1; i >= 0; i--) {
-    const projectile = game.projectiles[i];
-    const dx = projectile.x - player.x;
-    const dy = projectile.y - player.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-
-    if (dist < playerCollisionRadius + projectile.radius) {
-      // Check if player has shield
-      if (player.hasShield && player.shellFragments >= 3) {
-        // Consume shield and start recharge
-        player.hasShield = false;
-        player.shieldRechargeTimer = 1800; // 30 seconds at 60fps
-        // Grant brief invincibility to avoid instant re-hit
-        player.invincible = true;
-        player.invincibilityTimer = 120; // 2 seconds
-      } else {
-        player.isDead = true;
-      }
-
-      // Remove the projectile
-      game.projectiles.splice(i, 1);
-    }
-  }
-}
-
 export function trySpawnBoid(game: GameState): void {
   if (Math.random() < 0.02) {
     const maxBoids = GAME_CONSTANTS.BOID_COUNT;
@@ -429,27 +373,18 @@ export function trySpawnBoid(game: GameState): void {
 
 export function updateGame(game: GameState): void {
   updatePlayer(game);
-  updateBoids(game.boids, { x: game.player.x, y: game.player.y }, game.world.rocks, game.swarmers);
+  updateBoids(game.boids, { x: game.player.x, y: game.player.y }, game.world.rocks);
   updateLeviathans(
     game.leviathans,
     { x: game.player.x, y: game.player.y },
     game.boids,
     game.world.rocks
   );
-  updateSwarmers(
-    game.swarmers,
-    { x: game.player.x, y: game.player.y },
-    game.world.rocks,
-    game.projectiles,
-    game.frameCount
-  );
-  updateProjectiles(game);
   updateFoodOrbs(game);
   updateShellFragments(game);
   checkBoidCollisions(game);
   checkFoodOrbCollisions(game);
   checkShellFragmentCollisions(game);
-  checkProjectileCollisions(game);
   checkLeviathanStabs(game);
   trySpawnBoid(game);
   game.frameCount++;
