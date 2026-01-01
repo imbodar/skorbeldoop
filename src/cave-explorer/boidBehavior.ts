@@ -112,30 +112,45 @@ export function updateBoids(
       }
     }
 
-    // Swarmer trail attraction and avoidance
+    // Swarmer trail attraction and avoidance (optimized with distance pre-filtering)
     let swarmerTrailForceX = 0;
     let swarmerTrailForceY = 0;
 
     for (const swarmer of swarmers) {
-      // Check all trail points
+      // Pre-filter: quick check if swarmer is close enough before checking trail points
+      const swarmerDx = swarmer.x - boid.x;
+      const swarmerDy = swarmer.y - boid.y;
+      const swarmerDistSq = swarmerDx * swarmerDx + swarmerDy * swarmerDy;
+
+      // Skip this swarmer's trail if it's too far (using attraction radius + buffer)
+      const maxRelevantDistSq = (GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_RADIUS + 100) ** 2;
+      if (swarmerDistSq > maxRelevantDistSq) continue;
+
+      // Check trail points only for nearby swarmers
       for (const trailPoint of swarmer.trail) {
         const dx = trailPoint.x - boid.x;
         const dy = trailPoint.y - boid.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const distSq = dx * dx + dy * dy;
 
         // Avoid trail at close distances
-        if (dist < GAME_CONSTANTS.SWARMER_TRAIL_AVOIDANCE_RADIUS && dist > 0) {
+        const avoidRadiusSq = GAME_CONSTANTS.SWARMER_TRAIL_AVOIDANCE_RADIUS ** 2;
+        if (distSq < avoidRadiusSq && distSq > 0) {
+          const dist = Math.sqrt(distSq);
           const strength = (GAME_CONSTANTS.SWARMER_TRAIL_AVOIDANCE_RADIUS - dist) /
                           GAME_CONSTANTS.SWARMER_TRAIL_AVOIDANCE_RADIUS;
           swarmerTrailForceX -= (dx / dist) * strength * GAME_CONSTANTS.SWARMER_TRAIL_AVOIDANCE_STRENGTH;
           swarmerTrailForceY -= (dy / dist) * strength * GAME_CONSTANTS.SWARMER_TRAIL_AVOIDANCE_STRENGTH;
         }
         // Attract to trail at medium distances
-        else if (dist < GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_RADIUS && dist > 0) {
-          const strength = (GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_RADIUS - dist) /
-                          GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_RADIUS;
-          swarmerTrailForceX += (dx / dist) * strength * GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_STRENGTH;
-          swarmerTrailForceY += (dy / dist) * strength * GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_STRENGTH;
+        else {
+          const attractRadiusSq = GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_RADIUS ** 2;
+          if (distSq < attractRadiusSq && distSq > 0) {
+            const dist = Math.sqrt(distSq);
+            const strength = (GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_RADIUS - dist) /
+                            GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_RADIUS;
+            swarmerTrailForceX += (dx / dist) * strength * GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_STRENGTH;
+            swarmerTrailForceY += (dy / dist) * strength * GAME_CONSTANTS.SWARMER_TRAIL_ATTRACTION_STRENGTH;
+          }
         }
       }
     }
@@ -167,10 +182,10 @@ export function updateBoids(
     const newY = boid.y + boid.vy;
 
     if (!checkRockCollision(newX, newY, rocks)) {
-      boid.trail.push({ x: boid.x, y: boid.y });
-      if (boid.trail.length > GAME_CONSTANTS.BOID_TRAIL_LENGTH) {
-        boid.trail.shift();
-      }
+      // Circular buffer: write to current index and advance (no shift needed!)
+      boid.trail[boid.trailIndex].x = boid.x;
+      boid.trail[boid.trailIndex].y = boid.y;
+      boid.trailIndex = (boid.trailIndex + 1) % GAME_CONSTANTS.BOID_TRAIL_LENGTH;
 
       boid.x = newX;
       boid.y = newY;

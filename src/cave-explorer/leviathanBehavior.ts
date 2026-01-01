@@ -181,10 +181,10 @@ export function updateLeviathans(
     const newY = levi.y + levi.vy;
 
     if (!checkRockCollision(newX, newY, rocks, levi.width, levi.height)) {
-      levi.trail.push({ x: levi.x, y: levi.y });
-      if (levi.trail.length > GAME_CONSTANTS.LEVIATHAN_TRAIL_LENGTH) {
-        levi.trail.shift();
-      }
+      // Circular buffer: write to current index and advance (no shift needed!)
+      levi.trail[levi.trailIndex].x = levi.x;
+      levi.trail[levi.trailIndex].y = levi.y;
+      levi.trailIndex = (levi.trailIndex + 1) % GAME_CONSTANTS.LEVIATHAN_TRAIL_LENGTH;
       levi.x = newX;
       levi.y = newY;
     } else {

@@ -12,6 +12,7 @@ export interface Player {
   hunger: number;
   maxHunger: number;
   trail: Array<{ x: number; y: number }>;
+  trailIndex: number; // Circular buffer write index
   isDead: boolean;
   invincible: boolean;
   invincibilityTimer: number;
@@ -35,6 +36,7 @@ export interface Boid {
   vy: number;
   size: number;
   trail: Array<{ x: number; y: number }>;
+  trailIndex: number; // Circular buffer write index
 }
 
 export interface FoodOrb {
@@ -65,6 +67,7 @@ export interface Leviathan {
   vy: number;
   rotation: number;
   trail: Array<{ x: number; y: number }>;
+  trailIndex: number; // Circular buffer write index
   isCharging: boolean;
   chargeTimer: number;
   chargeDirection: { x: number; y: number };
@@ -86,6 +89,7 @@ export interface Swarmer {
   vy: number;
   rotation: number;
   trail: Array<{ x: number; y: number }>;
+  trailIndex: number; // Circular buffer write index
   lastShootTime: number;
 }
 

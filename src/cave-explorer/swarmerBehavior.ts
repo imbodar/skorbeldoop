@@ -10,9 +10,10 @@ export function updateSwarmers(
   frameCount: number
 ): void {
   swarmers.forEach(swarmer => {
-    const distToPlayer = Math.sqrt(
-      (swarmer.x - playerPos.x) ** 2 + (swarmer.y - playerPos.y) ** 2
-    );
+    // Cache direction and distance to player (calculated once and reused)
+    const dx = playerPos.x - swarmer.x;
+    const dy = playerPos.y - swarmer.y;
+    const distToPlayer = Math.sqrt(dx * dx + dy * dy);
 
     // Simplified update for far swarmers
     if (distToPlayer > GAME_CONSTANTS.SWARMER_UPDATE_RADIUS) {
@@ -25,18 +26,14 @@ export function updateSwarmers(
     const timeSinceLastShot = frameCount - swarmer.lastShootTime;
     if (timeSinceLastShot >= GAME_CONSTANTS.PROJECTILE_SHOOT_INTERVAL &&
         projectiles.length < GAME_CONSTANTS.PROJECTILE_MAX_COUNT) {
-      // Calculate direction to player
-      const dx = playerPos.x - swarmer.x;
-      const dy = playerPos.y - swarmer.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
 
-      if (dist > 0) {
-        // Create projectile
+      if (distToPlayer > 0) {
+        // Create projectile using cached distance
         const projectile: Projectile = {
           x: swarmer.x,
           y: swarmer.y,
-          vx: (dx / dist) * GAME_CONSTANTS.PROJECTILE_SPEED,
-          vy: (dy / dist) * GAME_CONSTANTS.PROJECTILE_SPEED,
+          vx: (dx / distToPlayer) * GAME_CONSTANTS.PROJECTILE_SPEED,
+          vy: (dy / distToPlayer) * GAME_CONSTANTS.PROJECTILE_SPEED,
           radius: GAME_CONSTANTS.PROJECTILE_RADIUS
         };
         projectiles.push(projectile);
@@ -44,15 +41,11 @@ export function updateSwarmers(
       }
     }
 
-    // Gentle attraction to player
-    const dx = playerPos.x - swarmer.x;
-    const dy = playerPos.y - swarmer.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-
-    if (dist > 0) {
+    // Gentle attraction to player using cached distance
+    if (distToPlayer > 0) {
       const pursueStrength = 0.15;
-      swarmer.vx += (dx / dist) * pursueStrength;
-      swarmer.vy += (dy / dist) * pursueStrength;
+      swarmer.vx += (dx / distToPlayer) * pursueStrength;
+      swarmer.vy += (dy / distToPlayer) * pursueStrength;
     }
 
     // Random variation for natural movement
@@ -110,10 +103,10 @@ export function updateSwarmers(
     const newY = swarmer.y + swarmer.vy;
 
     if (!checkRockCollision(newX, newY, rocks, swarmer.width, swarmer.height)) {
-      swarmer.trail.push({ x: swarmer.x, y: swarmer.y });
-      if (swarmer.trail.length > GAME_CONSTANTS.SWARMER_TRAIL_LENGTH) {
-        swarmer.trail.shift();
-      }
+      // Circular buffer: write to current index and advance (no shift needed!)
+      swarmer.trail[swarmer.trailIndex].x = swarmer.x;
+      swarmer.trail[swarmer.trailIndex].y = swarmer.y;
+      swarmer.trailIndex = (swarmer.trailIndex + 1) % GAME_CONSTANTS.SWARMER_TRAIL_LENGTH;
       swarmer.x = newX;
       swarmer.y = newY;
     } else {
