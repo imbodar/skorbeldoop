@@ -42,13 +42,13 @@ export function renderGame(ctx: CanvasRenderingContext2D, game: GameState): void
   ctx.strokeRect(0, 0, game.world.width, game.world.height);
 
   // Draw after-image trail
-  for (let i = 0; i < GAME_CONSTANTS.PLAYER_TRAIL_LENGTH; i += 5) {
+  for (let i = 0; i < GAME_CONSTANTS.PLAYER_TRAIL_LENGTH; i += 2) {
     const idx = (player.trailIndex + i) % GAME_CONSTANTS.PLAYER_TRAIL_LENGTH;
     const point = player.trail[idx];
 
     if (point.x !== 0 || point.y !== 0) {
       const age = i / GAME_CONSTANTS.PLAYER_TRAIL_LENGTH;
-      const alpha = age * 0.4;
+      const alpha = age * 0.5;
 
       ctx.save();
       ctx.globalAlpha = alpha;
