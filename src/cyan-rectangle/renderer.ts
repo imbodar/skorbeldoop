@@ -48,21 +48,25 @@ export function renderGame(ctx: CanvasRenderingContext2D, game: GameState): void
 
     if (point.x !== 0 || point.y !== 0) {
       const age = i / GAME_CONSTANTS.PLAYER_TRAIL_LENGTH;
-      const alpha = age * 0.5;
+      const alpha = age * 0.2;
 
       ctx.save();
       ctx.globalAlpha = alpha;
       ctx.translate(point.x, point.y);
       ctx.rotate(player.rotation);
 
-      // Draw semi-transparent rectangle
+      // Draw semi-transparent rounded rectangle
       ctx.fillStyle = '#00ffff';
-      ctx.fillRect(-player.width / 2, -player.height / 2, player.width, player.height);
+      ctx.beginPath();
+      ctx.roundRect(-player.width / 2, -player.height / 2, player.width, player.height, 8);
+      ctx.fill();
 
       // Draw border
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 2;
-      ctx.strokeRect(-player.width / 2, -player.height / 2, player.width, player.height);
+      ctx.beginPath();
+      ctx.roundRect(-player.width / 2, -player.height / 2, player.width, player.height, 8);
+      ctx.stroke();
 
       // Draw direction indicator
       ctx.fillStyle = '#ffffff';
@@ -77,14 +81,18 @@ export function renderGame(ctx: CanvasRenderingContext2D, game: GameState): void
   ctx.translate(player.x, player.y);
   ctx.rotate(player.rotation);
 
-  // Main rectangle body
+  // Main rectangle body with rounded corners
   ctx.fillStyle = '#00ffff';
-  ctx.fillRect(-player.width / 2, -player.height / 2, player.width, player.height);
+  ctx.beginPath();
+  ctx.roundRect(-player.width / 2, -player.height / 2, player.width, player.height, 8);
+  ctx.fill();
 
   // Border for visibility
   ctx.strokeStyle = '#ffffff';
   ctx.lineWidth = 2;
-  ctx.strokeRect(-player.width / 2, -player.height / 2, player.width, player.height);
+  ctx.beginPath();
+  ctx.roundRect(-player.width / 2, -player.height / 2, player.width, player.height, 8);
+  ctx.stroke();
 
   // Direction indicator (front edge)
   ctx.fillStyle = '#ffffff';
