@@ -21,6 +21,7 @@ export const PLAYER_COLORS = {
 export const ARENA_WIDTH = 800;
 export const ARENA_HEIGHT = 500;
 export const PLAYER_SIZE = 60;
+export const MOVE_SPEED = 5; // pixels per frame
 
 // Initial spawn positions (20% from edges)
 export const PLAYER1_SPAWN_X = ARENA_WIDTH * 0.2;

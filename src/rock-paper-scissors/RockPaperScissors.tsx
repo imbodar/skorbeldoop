@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { GameState, Choice, GameResult } from './types';
 import {
   CHOICE_EMOJI,
@@ -9,7 +9,8 @@ import {
   PLAYER1_SPAWN_X,
   PLAYER1_SPAWN_Y,
   PLAYER2_SPAWN_X,
-  PLAYER2_SPAWN_Y
+  PLAYER2_SPAWN_Y,
+  MOVE_SPEED
 } from './constants';
 
 const RockPaperScissors = () => {
@@ -26,6 +27,8 @@ const RockPaperScissors = () => {
     player2Entity: null,
   });
 
+  // Track pressed keys for smooth movement
+  const keysPressed = useRef<Set<string>>(new Set());
 
   const determineWinner = (p1: Choice, p2: Choice): GameResult => {
     if (!p1 || !p2) return null;
@@ -99,11 +102,84 @@ const RockPaperScissors = () => {
     });
   }, []);
 
+  // Update player positions based on pressed keys
+  const updatePositions = useCallback(() => {
+    setGameState((prev) => {
+      if (prev.phase !== 'arena' || !prev.player1Entity || !prev.player2Entity) {
+        return prev;
+      }
+
+      let p1NewX = prev.player1Entity.position.x;
+      let p1NewY = prev.player1Entity.position.y;
+      let p2NewX = prev.player2Entity.position.x;
+      let p2NewY = prev.player2Entity.position.y;
+
+      // Player 1 movement (WASD)
+      if (keysPressed.current.has('w')) p1NewY -= MOVE_SPEED;
+      if (keysPressed.current.has('s')) p1NewY += MOVE_SPEED;
+      if (keysPressed.current.has('a')) p1NewX -= MOVE_SPEED;
+      if (keysPressed.current.has('d')) p1NewX += MOVE_SPEED;
+
+      // Player 2 movement (Arrow keys)
+      if (keysPressed.current.has('arrowup')) p2NewY -= MOVE_SPEED;
+      if (keysPressed.current.has('arrowdown')) p2NewY += MOVE_SPEED;
+      if (keysPressed.current.has('arrowleft')) p2NewX -= MOVE_SPEED;
+      if (keysPressed.current.has('arrowright')) p2NewX += MOVE_SPEED;
+
+      // Clamp positions within arena bounds
+      const halfSize = PLAYER_SIZE / 2;
+      p1NewX = Math.max(halfSize, Math.min(ARENA_WIDTH - halfSize, p1NewX));
+      p1NewY = Math.max(halfSize, Math.min(ARENA_HEIGHT - halfSize, p1NewY));
+      p2NewX = Math.max(halfSize, Math.min(ARENA_WIDTH - halfSize, p2NewX));
+      p2NewY = Math.max(halfSize, Math.min(ARENA_HEIGHT - halfSize, p2NewY));
+
+      // Only update if positions changed
+      if (
+        p1NewX !== prev.player1Entity.position.x ||
+        p1NewY !== prev.player1Entity.position.y ||
+        p2NewX !== prev.player2Entity.position.x ||
+        p2NewY !== prev.player2Entity.position.y
+      ) {
+        return {
+          ...prev,
+          player1Entity: {
+            ...prev.player1Entity,
+            position: { x: p1NewX, y: p1NewY },
+          },
+          player2Entity: {
+            ...prev.player2Entity,
+            position: { x: p2NewX, y: p2NewY },
+          },
+        };
+      }
+
+      return prev;
+    });
+  }, []);
+
+  // Game loop for arena movement
+  useEffect(() => {
+    if (gameState.phase !== 'arena') return;
+
+    let animationFrameId: number;
+
+    const gameLoop = () => {
+      updatePositions();
+      animationFrameId = requestAnimationFrame(gameLoop);
+    };
+
+    animationFrameId = requestAnimationFrame(gameLoop);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [gameState.phase, updatePositions]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
 
-      // Player 1 controls: W, A, S (selection phase only)
+      // Selection phase - Player 1 controls: W, A, S
       if (gameState.phase === 'selection') {
         if (key === 'w') {
           handleChoice('player1', 'rock');
@@ -114,7 +190,7 @@ const RockPaperScissors = () => {
         }
       }
 
-      // Player 2 controls: Arrow keys (selection phase only)
+      // Selection phase - Player 2 controls: Arrow keys
       if (gameState.phase === 'selection') {
         if (key === 'arrowup') {
           handleChoice('player2', 'rock');
@@ -125,17 +201,33 @@ const RockPaperScissors = () => {
         }
       }
 
-      // Space to continue to next round (only in results phase)
+      // Arena phase - Track movement keys
+      if (gameState.phase === 'arena') {
+        const movementKeys = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
+        if (movementKeys.includes(key)) {
+          e.preventDefault();
+          keysPressed.current.add(key);
+        }
+      }
+
+      // Results phase - Space to continue
       if (key === ' ' && gameState.phase === 'results') {
         e.preventDefault();
         resetRound();
       }
     };
 
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      keysPressed.current.delete(key);
+    };
+
     window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
   }, [handleChoice, gameState.phase, resetRound]);
 
@@ -445,7 +537,11 @@ const RockPaperScissors = () => {
           color: '#666',
           fontSize: '14px',
         }}>
-          <p>Arena ready! Movement controls coming in next phase.</p>
+          <p><strong>Player 1 (Blue):</strong> WASD to move</p>
+          <p><strong>Player 2 (Pink):</strong> Arrow keys to move</p>
+          <p style={{ marginTop: '10px', fontSize: '12px', color: '#999' }}>
+            Collide with opponent to battle!
+          </p>
         </div>
 
         {/* Temporary: Auto-transition to results for testing */}
@@ -455,16 +551,17 @@ const RockPaperScissors = () => {
             endArena(winner);
           }}
           style={{
-            padding: '15px 30px',
-            fontSize: '18px',
-            backgroundColor: '#4A90E2',
+            padding: '12px 24px',
+            fontSize: '14px',
+            backgroundColor: '#999',
             color: 'white',
             border: 'none',
-            borderRadius: '8px',
+            borderRadius: '6px',
             cursor: 'pointer',
+            opacity: 0.7,
           }}
         >
-          Simulate Battle (Temporary)
+          Skip to Results (Dev)
         </button>
       </div>
     );
