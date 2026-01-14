@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { CaveExplorer } from './cave-explorer';
 import { CyanRectangle } from './cyan-rectangle';
 import { RockPaperScissors } from './rock-paper-scissors';
+import { ElementalNexus } from './elemental-nexus';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'cave-explorer' | 'cyan-rectangle' | 'rock-paper-scissors'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'cave-explorer' | 'cyan-rectangle' | 'rock-paper-scissors' | 'elemental-nexus'>('home');
 
   if (currentPage === 'cave-explorer') {
     return <CaveExplorer />;
@@ -16,6 +17,10 @@ export default function App() {
 
   if (currentPage === 'rock-paper-scissors') {
     return <RockPaperScissors />;
+  }
+
+  if (currentPage === 'elemental-nexus') {
+    return <ElementalNexus />;
   }
 
   return (
@@ -209,6 +214,57 @@ export default function App() {
             }}
           >
             Play Rock Paper Scissors
+          </button>
+        </div>
+
+        <div style={{
+          background: '#f8f9fa',
+          borderRadius: '12px',
+          padding: '30px',
+          marginBottom: '30px'
+        }}>
+          <h2 style={{
+            fontSize: '28px',
+            marginBottom: '15px',
+            color: '#333'
+          }}>
+            🔥💧🪨💨 Elemental Nexus
+          </h2>
+          <p style={{
+            fontSize: '16px',
+            color: '#666',
+            marginBottom: '20px',
+            lineHeight: '1.6'
+          }}>
+            Master the four elements in this action-packed survival game!<br />
+            Combine Fire, Water, Earth, and Air to defeat waves of enemies.<br />
+            <strong>Can you defeat the Void Tyrant?</strong>
+          </p>
+          <button
+            onClick={() => setCurrentPage('elemental-nexus')}
+            style={{
+              padding: '15px 40px',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              background: 'linear-gradient(135deg, #ff6b35, #f7931e, #4ecdc4, #45b7d1)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(255, 107, 53, 0.4)',
+              transition: 'all 0.3s',
+              fontFamily: 'inherit'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 107, 53, 0.6)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 15px rgba(255, 107, 53, 0.4)';
+            }}
+          >
+            Play Elemental Nexus
           </button>
         </div>
 
