@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elemental Nexus</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="gameCanvas"></div>
+<button id="upgradeBtn">Elements</button>
+
+<div class="modal-overlay" id="upgradeModal">
+<div class="modal-content">
+<button class="close-modal" id="closeModal">×</button>
+<div class="modal-title">Elemental Nexus</div>
+<div class="modal-subtitle">Choose Your Element</div>
+<div class="elements-grid">
+<div class="element-card fire" data-element="fire">
+<div class="element-icon">🔥</div>
+<div class="element-name">Fire</div>
+<div class="element-desc">Launch blazing projectiles that burn enemies over time</div>
+</div>
+<div class="element-card earth" data-element="earth">
+<div class="element-icon">🪨</div>
+<div class="element-name">Earth</div>
+<div class="element-desc">Deploy rotating shields and unleash earthquakes</div>
+</div>
+<div class="element-card water" data-element="water">
+<div class="element-icon">💧</div>
+<div class="element-name">Water</div>
+<div class="element-desc">Control waves that push enemies and heal yourself</div>
+</div>
+<div class="element-card air" data-element="air">
+<div class="element-icon">💨</div>
+<div class="element-name">Air</div>
+<div class="element-desc">Wield a sweeping sword that cuts through foes</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="health-bar-container">
+<div class="health-bar-fill" id="healthBarFill"></div>
+<div class="health-bar-text" id="healthBarText">100 / 100</div>
+</div>
+
+<div class="kill-counter" id="killCounter">0</div>
+
+<script src="game.js"></script>
+</body>
+</html>
