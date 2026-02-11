@@ -25,4 +25,13 @@ export const GAME_CONSTANTS = {
   VORONOI_REGIONS: 100, // Total regions (50 will be rock, 50 will be air)
   VORONOI_GRID_SIZE: 80, // Size of each rock tile
   CLEAR_RADIUS: 400, // Radius around spawn that's guaranteed to be clear
+
+  // Boids (pink flocking creatures)
+  BOID_COUNT: 200,
+  BOID_SIZE: 12,
+  BOID_BASE_MAX_SPEED: 3,
+  BOID_PERCEPTION_RADIUS: 50,
+  BOID_SEPARATION_DISTANCE: 50,
+  BOID_TRAIL_LENGTH: 16,
+  BOID_VISIBILITY_RADIUS: 800,
 };
