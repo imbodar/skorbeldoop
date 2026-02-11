@@ -4,7 +4,6 @@ import { GAME_CONSTANTS } from './constants';
 import { generateRocks } from './worldGenerator';
 import { generateBoids } from './boidGenerator';
 import { generateLeviathans, spawnLeviathan } from './leviathanGenerator';
-import { generateSwarmers, spawnSwarmer } from './swarmerGenerator';
 import { initializePlayer, updateGame } from './gameState';
 import { renderGame } from './renderer';
 
@@ -36,8 +35,6 @@ export default function CaveExplorer() {
       previousRayEndpoints: [],
       boids: [],
       leviathans: [],
-      swarmers: [],
-      projectiles: [],
       foodOrbs: [],
       shellFragments: [],
       frameCount: 0
@@ -63,12 +60,6 @@ export default function CaveExplorer() {
       game.world.rocks
     );
     console.log(`Generated ${game.leviathans.length} leviathans`);
-
-    game.swarmers = generateSwarmers(
-      { x: game.player.x, y: game.player.y },
-      game.world.rocks
-    );
-    console.log(`Generated ${game.swarmers.length} swarmers`);
 
     // Input handlers
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -121,23 +112,6 @@ export default function CaveExplorer() {
     if (gameRef.current) {
       gameRef.current.player.shellFragments++;
       console.log(`Shell fragments: ${gameRef.current.player.shellFragments}/3`);
-    }
-  };
-
-  const handleSpawnSwarmer = () => {
-    if (gameRef.current) {
-      const spawned = spawnSwarmer(
-        { x: gameRef.current.player.x, y: gameRef.current.player.y },
-        gameRef.current.world.rocks,
-        true
-      );
-
-      if (spawned) {
-        gameRef.current.swarmers.push(spawned);
-        console.log('Swarmer spawned nearby!');
-      } else {
-        console.log('Could not find valid spawn location for swarmer');
-      }
     }
   };
 
@@ -228,32 +202,6 @@ export default function CaveExplorer() {
           }}
         >
           Add Shell Fragment
-        </button>
-        <button
-          onClick={handleSpawnSwarmer}
-          style={{
-            padding: '10px 20px',
-            fontSize: '14px',
-            fontFamily: 'monospace',
-            background: '#FFD700',
-            color: '#0f0f1e',
-            border: '2px solid #FFA500',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            boxShadow: '0 0 15px rgba(255, 215, 0, 0.3)',
-            transition: 'all 0.2s'
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.background = '#FFED4E';
-            e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 215, 0, 0.5)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.background = '#FFD700';
-            e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.3)';
-          }}
-        >
-          Spawn Swarmer
         </button>
         <div style={{
           color: '#aaaaaa',
